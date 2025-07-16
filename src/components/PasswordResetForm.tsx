@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { SecurityUtils } from '../utils/security';
 
 const PasswordResetForm: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -12,6 +13,7 @@ const PasswordResetForm: React.FC = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Get the token from URL parameters
   const token = searchParams.get('token');
@@ -27,29 +29,48 @@ const PasswordResetForm: React.FC = () => {
   const finalType = type || hashType;
 
   useEffect(() => {
-    // If no token or wrong type, redirect to login
-    if (!finalToken || finalType !== 'recovery') {
+    // Validate token format and type
+    if (!finalToken || !SecurityUtils.isValidToken(finalToken) || finalType !== 'recovery') {
       console.log('Invalid password reset link - redirecting to login');
-      navigate('/');
+      setMessage('Invalid or expired password reset link. Please request a new one.');
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
       return;
     }
   }, [finalToken, finalType, navigate]);
 
+  const validateForm = (): boolean => {
+    const errors: string[] = [];
+    
+    // Validate password strength
+    const passwordValidation = SecurityUtils.isStrongPassword(password);
+    if (!passwordValidation.isValid) {
+      errors.push(...passwordValidation.errors);
+    }
+    
+    // Check password confirmation
+    if (password !== confirmPassword) {
+      errors.push('Passwords do not match');
+    }
+    
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      setMessage('Password must be at least 6 characters long');
+    // Clear previous messages
+    setMessage('');
+    setValidationErrors([]);
+    
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    setMessage('');
 
     try {
       // First, set the session using the recovery token
@@ -88,7 +109,7 @@ const PasswordResetForm: React.FC = () => {
     }
   };
 
-  if (!finalToken || finalType !== 'recovery') {
+  if (!finalToken || !SecurityUtils.isValidToken(finalToken) || finalType !== 'recovery') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -122,14 +143,15 @@ const PasswordResetForm: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(SecurityUtils.sanitizeInput(e.target.value))}
                   className="block w-full pr-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Enter new password"
+                  minLength={8}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-5 w-5 text-gray-400" />
@@ -138,6 +160,9 @@ const PasswordResetForm: React.FC = () => {
                   )}
                 </button>
               </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Password must be at least 8 characters with uppercase, lowercase, number, and special character
+              </p>
             </div>
 
             <div>
@@ -151,14 +176,15 @@ const PasswordResetForm: React.FC = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(SecurityUtils.sanitizeInput(e.target.value))}
                   className="block w-full pr-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Confirm new password"
+                  minLength={8}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showConfirmPassword ? (
                     <EyeSlashIcon className="h-5 w-5 text-gray-400" />
@@ -169,30 +195,52 @@ const PasswordResetForm: React.FC = () => {
               </div>
             </div>
 
+            {/* Validation Errors */}
+            {validationErrors.length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Please fix the following errors:
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <ul className="list-disc pl-5 space-y-1">
+                        {validationErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success/Error Messages */}
             {message && (
               <div className={`text-sm ${message.includes('Error') ? 'text-red-600' : 'text-green-600'}`}>
                 {message}
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="flex items-center text-sm text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeftIcon className="w-4 h-4 mr-1" />
-                Back to sign in
-              </button>
+            <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Updating...' : 'Update Password'}
+                {loading ? 'Updating Password...' : 'Update Password'}
               </button>
             </div>
           </form>
+        </div>
+        
+        <div className="text-center">
+          <button
+            onClick={() => navigate('/')}
+            className="text-primary-600 hover:text-primary-500 text-sm font-medium"
+          >
+            Back to Sign In
+          </button>
         </div>
       </div>
     </div>
