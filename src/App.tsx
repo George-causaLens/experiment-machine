@@ -5,6 +5,8 @@ import { supabase } from './supabaseClient';
 import { User } from '@supabase/supabase-js';
 import Navigation from './components/Navigation';
 import AuthComponent from './components/Auth';
+import PendingApproval from './components/PendingApproval';
+import SuperAdminDashboard from './components/SuperAdminDashboard';
 import Dashboard from './components/Dashboard';
 import ExperimentManager from './components/ExperimentManager';
 import CreateExperiment from './components/CreateExperiment';
@@ -18,18 +20,22 @@ import CreateICPProfile from './components/CreateICPProfile';
 import AIRecommendations from './components/AIRecommendations';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Integrations from './components/Integrations';
-import { Experiment, Blueprint, ICPProfile } from './types';
+import { Experiment, Blueprint, ICPProfile, User as AppUser } from './types';
 import { DataService } from './services/dataService';
+import { UserManagementService } from './services/userManagementService';
+import { XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
   const [icpProfiles, setICPProfiles] = useState<ICPProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
+  const [userStatusLoading, setUserStatusLoading] = useState(true);
 
   // Check for existing session on app load
   useEffect(() => {
@@ -52,9 +58,33 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Check user approval status when user changes
+  useEffect(() => {
+    if (!user) {
+      setAppUser(null);
+      setUserStatusLoading(false);
+      return;
+    }
+
+    const checkUserStatus = async () => {
+      try {
+        setUserStatusLoading(true);
+        const currentUser = await UserManagementService.getCurrentUser();
+        setAppUser(currentUser);
+      } catch (error) {
+        console.error('Error checking user status:', error);
+        setAppUser(null);
+      } finally {
+        setUserStatusLoading(false);
+      }
+    };
+
+    checkUserStatus();
+  }, [user]);
+
   // Load data from Supabase on component mount
   useEffect(() => {
-    if (!user) return; // Only load data if user is authenticated
+    if (!user || !appUser || appUser.status !== 'approved') return; // Only load data if user is authenticated and approved
 
     const loadData = async () => {
       try {
@@ -80,7 +110,7 @@ function App() {
     };
 
     loadData();
-  }, [user]);
+  }, [user, appUser]);
 
   const addExperiment = async (experiment: Omit<Experiment, 'id' | 'createdAt'>) => {
     const newExperiment = await DataService.createExperiment(experiment);
@@ -137,7 +167,7 @@ function App() {
     setICPProfiles(prev => prev.filter(profile => profile.id !== id));
   };
 
-  if (authLoading) {
+  if (authLoading || userStatusLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -155,6 +185,71 @@ function App() {
           // Auth success will be handled by the auth state change listener
         }} 
       />
+    );
+  }
+
+  // Show pending approval screen if user is not approved
+  if (appUser && appUser.status === 'pending') {
+    return <PendingApproval />;
+  }
+
+  // Show rejected screen if user is rejected
+  if (appUser && appUser.status === 'rejected') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <div className="mx-auto h-24 w-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <XCircleIcon className="h-12 w-12 text-red-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Account Rejected</h1>
+            <p className="mt-4 text-lg text-gray-600">
+              Your registration request has been rejected.
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Please contact support if you believe this was an error.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="btn-primary"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show suspended screen if user is suspended
+  if (appUser && appUser.status === 'suspended') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <div className="mx-auto h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+              <ExclamationTriangleIcon className="h-12 w-12 text-yellow-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Account Suspended</h1>
+            <p className="mt-4 text-lg text-gray-600">
+              Your account has been suspended.
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Please contact support for more information.
+            </p>
+          </div>
+          <div className="text-center">
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="btn-primary"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -190,6 +285,7 @@ function App() {
             <Route path="/ai-recommendations" element={<AIRecommendations experiments={experiments} blueprints={blueprints} onAddExperiment={addExperiment} onAddBlueprint={addBlueprint} />} />
             <Route path="/analytics" element={<AnalyticsDashboard experiments={experiments} blueprints={blueprints} />} />
             <Route path="/integrations" element={<Integrations />} />
+            <Route path="/super-admin" element={<SuperAdminDashboard />} />
           </Routes>
         </main>
         <Toaster position="top-right" />

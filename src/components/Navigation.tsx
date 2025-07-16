@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   ChartBarIcon, 
@@ -9,13 +9,28 @@ import {
   LightBulbIcon,
   UserGroupIcon,
   HomeIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from '../supabaseClient';
+import { UserManagementService } from '../services/userManagementService';
 
 const Navigation: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const checkSuperAdmin = async () => {
+      try {
+        const isAdmin = await UserManagementService.isSuperAdmin();
+        setIsSuperAdmin(isAdmin);
+      } catch (error) {
+        console.error('Error checking super admin status:', error);
+      }
+    };
+    checkSuperAdmin();
+  }, []);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
@@ -24,6 +39,7 @@ const Navigation: React.FC = () => {
     { name: 'AI Recommendations', href: '/ai-recommendations', icon: LightBulbIcon },
     { name: 'ICP Profiles', href: '/icp-profiles', icon: UserGroupIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+    ...(isSuperAdmin ? [{ name: 'Super Admin', href: '/super-admin', icon: ShieldCheckIcon }] : []),
   ];
 
   const handleLogout = async () => {

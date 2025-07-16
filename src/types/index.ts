@@ -208,4 +208,32 @@ export interface SuccessScoreCalculation {
     costEfficiency: number; // ROI vs expected
     qualityScore: number; // Lead quality, meeting attendance, etc.
   };
+}
+
+export interface User {
+  id: string;
+  email: string;
+  full_name?: string;
+  role: 'super_admin' | 'admin' | 'user' | 'pending';
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  approved_at?: Date;
+  approved_by?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserApprovalRequest {
+  id: string;
+  email: string;
+  full_name?: string;
+  created_at: Date;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface SuperAdminStats {
+  totalUsers: number;
+  pendingApprovals: number;
+  approvedUsers: number;
+  rejectedUsers: number;
+  suspendedUsers: number;
 } 
