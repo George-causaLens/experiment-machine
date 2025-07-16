@@ -34,11 +34,6 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             }}
             providers={['google', 'github']}
             redirectTo={window.location.origin}
-            onAuthStateChange={(event, session) => {
-              if (event === 'SIGNED_IN' && session) {
-                onAuthSuccess?.();
-              }
-            }}
           />
         </div>
         

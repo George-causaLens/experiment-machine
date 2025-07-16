@@ -14,7 +14,26 @@ CREATE TABLE IF NOT EXISTS public.users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Create RLS policies for users table
+-- 2. Add user_id columns to existing tables if they don't exist
+DO $$ 
+BEGIN
+    -- Add user_id to experiments table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'experiments' AND column_name = 'user_id') THEN
+        ALTER TABLE public.experiments ADD COLUMN user_id UUID REFERENCES auth.users(id);
+    END IF;
+    
+    -- Add user_id to blueprints table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'blueprints' AND column_name = 'user_id') THEN
+        ALTER TABLE public.blueprints ADD COLUMN user_id UUID REFERENCES auth.users(id);
+    END IF;
+    
+    -- Add user_id to icp_profiles table
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'icp_profiles' AND column_name = 'user_id') THEN
+        ALTER TABLE public.icp_profiles ADD COLUMN user_id UUID REFERENCES auth.users(id);
+    END IF;
+END $$;
+
+-- 3. Create RLS policies for users table
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- Super admins can see all users
@@ -52,7 +71,7 @@ CREATE POLICY "Only super admins can insert users" ON public.users
     )
   );
 
--- 3. Create function to handle new user registration
+-- 4. Create function to handle new user registration
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -68,13 +87,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. Create trigger for new user registration
+-- 5. Create trigger for new user registration
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5. Create function to check if user is approved
+-- 6. Create function to check if user is approved
 CREATE OR REPLACE FUNCTION public.is_user_approved(user_id UUID DEFAULT auth.uid())
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -85,7 +104,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 6. Update existing RLS policies to require approval
+-- 7. Update existing RLS policies to require approval
 -- Experiments
 DROP POLICY IF EXISTS "Users can view own experiments" ON public.experiments;
 CREATE POLICY "Approved users can view own experiments" ON public.experiments
@@ -161,7 +180,7 @@ CREATE POLICY "Approved users can delete own icp profiles" ON public.icp_profile
     public.is_user_approved() AND user_id = auth.uid()
   );
 
--- 7. Create the first super admin (replace with your email)
+-- 8. Create the first super admin (replace with your email)
 -- IMPORTANT: Replace 'your-email@example.com' with your actual email
 INSERT INTO public.users (id, email, full_name, role, status, approved_at)
 SELECT 
@@ -178,7 +197,7 @@ ON CONFLICT (id) DO UPDATE SET
   status = 'approved',
   approved_at = NOW();
 
--- 8. Create function to approve users
+-- 9. Create function to approve users
 CREATE OR REPLACE FUNCTION public.approve_user(user_id UUID, approved_by UUID DEFAULT auth.uid())
 RETURNS VOID AS $$
 BEGIN
@@ -201,7 +220,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 9. Create function to reject users
+-- 10. Create function to reject users
 CREATE OR REPLACE FUNCTION public.reject_user(user_id UUID, rejected_by UUID DEFAULT auth.uid())
 RETURNS VOID AS $$
 BEGIN
@@ -222,7 +241,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 10. Create function to suspend users
+-- 11. Create function to suspend users
 CREATE OR REPLACE FUNCTION public.suspend_user(user_id UUID, suspended_by UUID DEFAULT auth.uid())
 RETURNS VOID AS $$
 BEGIN

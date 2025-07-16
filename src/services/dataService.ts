@@ -96,6 +96,13 @@ export class DataService {
   }
 
   static async createExperiment(experiment: Omit<Experiment, 'id' | 'createdAt'>): Promise<Experiment | null> {
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No authenticated user found');
+      return null;
+    }
+
     const dbExperiment = {
       name: experiment.name,
       description: experiment.description,
@@ -116,7 +123,8 @@ export class DataService {
       custom_targeting: experiment.customTargeting,
       target_audience: experiment.targetAudience,
       success_criteria: experiment.successCriteria,
-      integration_tracking: experiment.integrationTracking
+      integration_tracking: experiment.integrationTracking,
+      user_id: user.id
     };
 
     const { data, error } = await supabase
@@ -200,6 +208,13 @@ export class DataService {
   }
 
   static async createBlueprint(blueprint: Omit<Blueprint, 'id' | 'createdAt' | 'lastUsed'>): Promise<Blueprint | null> {
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No authenticated user found');
+      return null;
+    }
+
     const dbBlueprint = {
       name: blueprint.name,
       description: blueprint.description,
@@ -215,7 +230,8 @@ export class DataService {
       conversion_rate: blueprint.conversionRate,
       tags: blueprint.tags,
       usage_count: blueprint.usageCount,
-      related_experiments: blueprint.relatedExperiments
+      related_experiments: blueprint.relatedExperiments,
+      user_id: user.id
     };
 
     const { data, error } = await supabase
@@ -247,6 +263,13 @@ export class DataService {
   }
 
   static async createICPProfile(profile: Omit<ICPProfile, 'id' | 'createdAt' | 'lastUsed'>): Promise<ICPProfile | null> {
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No authenticated user found');
+      return null;
+    }
+
     const dbProfile = {
       name: profile.name,
       description: profile.description,
@@ -260,7 +283,8 @@ export class DataService {
       buying_authority: profile.buyingAuthority,
       tags: profile.tags,
       usage_count: profile.usageCount,
-      related_experiments: profile.relatedExperiments
+      related_experiments: profile.relatedExperiments,
+      user_id: user.id
     };
 
     const { data, error } = await supabase
