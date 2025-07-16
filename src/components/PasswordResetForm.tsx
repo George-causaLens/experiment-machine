@@ -16,15 +16,24 @@ const PasswordResetForm: React.FC = () => {
   // Get the token from URL parameters
   const token = searchParams.get('token');
   const type = searchParams.get('type');
+  
+  // Also check for hash-based tokens (Supabase sometimes uses this)
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const hashToken = hashParams.get('access_token');
+  const hashType = hashParams.get('type');
+  
+  // Use either token source
+  const finalToken = token || hashToken;
+  const finalType = type || hashType;
 
   useEffect(() => {
     // If no token or wrong type, redirect to login
-    if (!token || type !== 'recovery') {
+    if (!finalToken || finalType !== 'recovery') {
       console.log('Invalid password reset link - redirecting to login');
       navigate('/');
       return;
     }
-  }, [token, type, navigate]);
+  }, [finalToken, finalType, navigate]);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +52,25 @@ const PasswordResetForm: React.FC = () => {
     setMessage('');
 
     try {
+      // First, set the session using the recovery token
+      const { data, error: sessionError } = await supabase.auth.setSession({
+        access_token: finalToken,
+        refresh_token: finalToken // For recovery tokens, we use the same token
+      });
+
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        setMessage(`Error: ${sessionError.message}`);
+        return;
+      }
+
+      // Now update the password with the active session
       const { error } = await supabase.auth.updateUser({
         password: password
       });
 
       if (error) {
+        console.error('Password reset error:', error);
         setMessage(`Error: ${error.message}`);
       } else {
         setMessage('Password updated successfully! Redirecting to login...');
@@ -58,13 +81,14 @@ const PasswordResetForm: React.FC = () => {
         }, 2000);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred');
+      console.error('Unexpected error during password reset:', error);
+      setMessage('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!token || type !== 'recovery') {
+  if (!finalToken || finalType !== 'recovery') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
