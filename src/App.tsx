@@ -58,6 +58,33 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Handle password reset redirects on every page load
+  useEffect(() => {
+    const handlePasswordResetRedirect = () => {
+      // Check for password reset in URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPasswordReset = urlParams.get('type') === 'recovery' && urlParams.get('token');
+      
+      // Check for password reset in hash (Supabase sometimes uses this)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const isHashPasswordReset = hashParams.get('type') === 'recovery' && hashParams.get('access_token');
+      
+      if (isPasswordReset || isHashPasswordReset) {
+        const token = urlParams.get('token') || hashParams.get('access_token');
+        const type = urlParams.get('type') || hashParams.get('type');
+        
+        if (token && type === 'recovery') {
+          console.log('Detected password reset redirect, redirecting to password reset form');
+          // Clear the URL and redirect to password reset form
+          window.history.replaceState({}, document.title, '/password-reset');
+          window.location.href = `/password-reset?token=${token}&type=${type}`;
+        }
+      }
+    };
+
+    handlePasswordResetRedirect();
+  }, []);
+
   // Check user approval status when user changes
   useEffect(() => {
     if (!user) {
@@ -222,8 +249,27 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const isPasswordReset = urlParams.get('type') === 'recovery' && urlParams.get('token');
   
-  if (isPasswordReset) {
-    return <PasswordResetForm />;
+  // Also check for hash-based redirects from Supabase
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const isHashPasswordReset = hashParams.get('type') === 'recovery' && hashParams.get('access_token');
+  
+  if (isPasswordReset || isHashPasswordReset) {
+    // Redirect to the password reset form with the token
+    const token = urlParams.get('token') || hashParams.get('access_token');
+    const type = urlParams.get('type') || hashParams.get('type');
+    
+    if (token && type === 'recovery') {
+      // Redirect to password reset form with the token
+      window.location.href = `/password-reset?token=${token}&type=${type}`;
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Redirecting to password reset...</p>
+          </div>
+        </div>
+      );
+    }
   }
 
   if (!user) {
