@@ -73,7 +73,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   const handleUpdateRole = async (userId: string, role: User['role']) => {
     try {
-      await UserManagementService.updateUserRole(userId, role);
+      await UserManagementService.updateUserByAdmin(userId, { role });
       await loadData();
     } catch (error) {
       console.error('Error updating user role:', error);
