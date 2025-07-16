@@ -6,27 +6,38 @@ export class UserManagementService {
    * Get all users (super admin only)
    */
   static async getAllUsers(): Promise<User[]> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
+    try {
+      const { data, error } = await supabase.rpc('get_all_users');
+      
+      if (error) {
+        console.error('Error getting all users:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllUsers:', error);
+      return [];
+    }
   }
 
   /**
    * Get pending approval requests
    */
   static async getPendingApprovals(): Promise<UserApprovalRequest[]> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, email, full_name, created_at, status')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true });
-    
-    if (error) throw error;
-    return data || [];
+    try {
+      const { data, error } = await supabase.rpc('get_all_users');
+      
+      if (error) {
+        console.error('Error getting pending approvals:', error);
+        return [];
+      }
+      
+      return (data || []).filter(u => u.status === 'pending');
+    } catch (error) {
+      console.error('Error in getPendingApprovals:', error);
+      return [];
+    }
   }
 
   /**
@@ -132,7 +143,10 @@ export class UserManagementService {
    * Approve a user (super admin only)
    */
   static async approveUser(userId: string): Promise<void> {
-    const { error } = await supabase.rpc('approve_user', { user_id: userId });
+    const { error } = await supabase.rpc('update_user_by_admin', { 
+      target_user_id: userId,
+      new_status: 'approved'
+    });
     if (error) throw error;
   }
 
@@ -140,7 +154,10 @@ export class UserManagementService {
    * Reject a user (super admin only)
    */
   static async rejectUser(userId: string): Promise<void> {
-    const { error } = await supabase.rpc('reject_user', { user_id: userId });
+    const { error } = await supabase.rpc('update_user_by_admin', { 
+      target_user_id: userId,
+      new_status: 'rejected'
+    });
     if (error) throw error;
   }
 
@@ -148,7 +165,10 @@ export class UserManagementService {
    * Suspend a user (super admin only)
    */
   static async suspendUser(userId: string): Promise<void> {
-    const { error } = await supabase.rpc('suspend_user', { user_id: userId });
+    const { error } = await supabase.rpc('update_user_by_admin', { 
+      target_user_id: userId,
+      new_status: 'suspended'
+    });
     if (error) throw error;
   }
 
