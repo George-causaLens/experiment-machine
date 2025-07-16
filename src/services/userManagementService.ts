@@ -52,7 +52,7 @@ export class UserManagementService {
       throw new Error('Failed to fetch pending approvals');
     }
     
-    return (data || []).map(user => ({
+    return (data || []).map((user: any) => ({
       id: user.id,
       email: user.email,
       full_name: user.full_name,
