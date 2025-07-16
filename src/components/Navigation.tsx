@@ -8,8 +8,10 @@ import {
   XMarkIcon,
   LightBulbIcon,
   UserGroupIcon,
-  HomeIcon
+  HomeIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
+import { supabase } from '../supabaseClient';
 
 const Navigation: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,6 +25,10 @@ const Navigation: React.FC = () => {
     { name: 'ICP Profiles', href: '/icp-profiles', icon: UserGroupIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   ];
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const isCurrentPath = (href: string) => {
     if (href === '/') {
@@ -62,6 +68,13 @@ const Navigation: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
+              Sign Out
+            </button>
           </nav>
         </div>
       </div>
@@ -87,6 +100,13 @@ const Navigation: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            >
+              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
+              Sign Out
+            </button>
           </nav>
         </div>
       </div>

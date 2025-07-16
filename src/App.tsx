@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { supabase } from './supabaseClient';
+import { User } from '@supabase/supabase-js';
 import Navigation from './components/Navigation';
+import AuthComponent from './components/Auth';
 import Dashboard from './components/Dashboard';
 import ExperimentManager from './components/ExperimentManager';
 import CreateExperiment from './components/CreateExperiment';
@@ -21,14 +24,38 @@ import { DataService } from './services/dataService';
 
 
 function App() {
+  const [user, setUser] = useState<User | null>(null);
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
   const [icpProfiles, setICPProfiles] = useState<ICPProfile[]>([]);
-
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Check for existing session on app load
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null);
+        setAuthLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Load data from Supabase on component mount
   useEffect(() => {
+    if (!user) return; // Only load data if user is authenticated
+
     const loadData = async () => {
       try {
         setLoading(true);
@@ -53,7 +80,7 @@ function App() {
     };
 
     loadData();
-  }, []);
+  }, [user]);
 
   const addExperiment = async (experiment: Omit<Experiment, 'id' | 'createdAt'>) => {
     const newExperiment = await DataService.createExperiment(experiment);
@@ -109,6 +136,27 @@ function App() {
     // For now, we'll delete locally. In a full implementation, you'd call DataService.deleteICPProfile
     setICPProfiles(prev => prev.filter(profile => profile.id !== id));
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <AuthComponent 
+        onAuthSuccess={() => {
+          // Auth success will be handled by the auth state change listener
+        }} 
+      />
+    );
+  }
 
   if (loading) {
     return (
