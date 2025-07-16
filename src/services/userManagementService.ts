@@ -14,7 +14,7 @@ export class UserManagementService {
         return [];
       }
       
-      return data || [];
+      return (data || []) as User[];
     } catch (error) {
       console.error('Error in getAllUsers:', error);
       return [];
@@ -33,7 +33,7 @@ export class UserManagementService {
         return [];
       }
       
-      return (data || []).filter(u => u.status === 'pending');
+      return (data || []).filter((u: any) => u.status === 'pending');
     } catch (error) {
       console.error('Error in getPendingApprovals:', error);
       return [];
