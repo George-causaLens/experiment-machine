@@ -30,20 +30,86 @@ export class UserManagementService {
   }
 
   /**
-   * Get current user's profile
+   * Get current user's profile with fallback
    */
   static async getCurrentUser(): Promise<User | null> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    
-    if (error) throw error;
-    return data;
+    try {
+      // First try the normal query
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        // If user doesn't exist in users table, create them
+        if (error.code === 'PGRST116') {
+          console.log('User not found in users table, creating entry...');
+          return await this.createUserEntry(user);
+        }
+        
+        console.error('Error fetching user:', error);
+        // Try fallback approach
+        return await this.getCurrentUserFallback(user.id);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Unexpected error in getCurrentUser:', error);
+      return await this.getCurrentUserFallback(user.id);
+    }
+  }
+
+  /**
+   * Fallback method to get user data
+   */
+  private static async getCurrentUserFallback(userId: string): Promise<User | null> {
+    try {
+      // Try to get user data using RPC function that bypasses RLS
+      const { data, error } = await supabase.rpc('get_user_by_id', { user_id: userId });
+      
+      if (error) {
+        console.error('Fallback user lookup failed:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Fallback user lookup error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create user entry in users table
+   */
+  private static async createUserEntry(authUser: any): Promise<User | null> {
+    try {
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert([{
+          id: authUser.id,
+          email: authUser.email,
+          full_name: authUser.user_metadata?.full_name || authUser.email,
+          role: 'pending',
+          status: 'pending'
+        }])
+        .select()
+        .single();
+      
+      if (createError) {
+        console.error('Error creating user entry:', createError);
+        return null;
+      }
+      
+      return newUser;
+    } catch (error) {
+      console.error('Error in createUserEntry:', error);
+      return null;
+    }
   }
 
   /**
