@@ -32,7 +32,6 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
                 },
               },
             }}
-            providers={['google', 'github']}
             redirectTo={window.location.origin}
           />
         </div>
