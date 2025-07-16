@@ -4,24 +4,31 @@ import { User, UserApprovalRequest, SuperAdminStats } from '../types';
 export class UserManagementService {
   // Get all users (super admin only)
   static async getAllUsers(): Promise<User[]> {
+    console.log('Fetching all users...');
     const { data, error } = await supabase.rpc('get_all_users');
     
     if (error) {
       console.error('Error fetching users:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       throw new Error('Failed to fetch users');
     }
     
+    console.log('All users data:', data);
     return data || [];
   }
 
   // Get super admin statistics
   static async getSuperAdminStats(): Promise<SuperAdminStats> {
+    console.log('Fetching super admin stats...');
     const { data, error } = await supabase.rpc('get_super_admin_stats');
     
     if (error) {
       console.error('Error fetching super admin stats:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       throw new Error('Failed to fetch super admin stats');
     }
+    
+    console.log('Super admin stats data:', data);
     
     if (!data || data.length === 0) {
       return {
@@ -45,12 +52,16 @@ export class UserManagementService {
 
   // Get pending approval requests
   static async getPendingApprovals(): Promise<UserApprovalRequest[]> {
+    console.log('Fetching pending approvals...');
     const { data, error } = await supabase.rpc('get_pending_approvals');
     
     if (error) {
       console.error('Error fetching pending approvals:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       throw new Error('Failed to fetch pending approvals');
     }
+    
+    console.log('Pending approvals data:', data);
     
     return (data || []).map((user: any) => ({
       id: user.id,
@@ -66,6 +77,9 @@ export class UserManagementService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    console.log('Current auth user ID:', user.id);
+    console.log('Current auth user email:', user.email);
+
     try {
       // Try to get user data from the users table
       const { data, error } = await supabase
@@ -79,6 +93,7 @@ export class UserManagementService {
         return null;
       }
       
+      console.log('Current user from database:', data);
       return data;
     } catch (error) {
       console.error('Error in getCurrentUser:', error);
