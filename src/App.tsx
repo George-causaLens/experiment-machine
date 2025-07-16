@@ -260,6 +260,17 @@ function App() {
     );
   }
 
+  // Special case: Show password reset form if we're on the password reset route
+  if (window.location.pathname === '/password-reset') {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/password-reset" element={<PasswordResetForm />} />
+        </Routes>
+      </Router>
+    );
+  }
+
   if (!user) {
     return (
       <AuthComponent 
@@ -385,7 +396,6 @@ function App() {
             <Route path="/analytics" element={<AnalyticsDashboard experiments={experiments} blueprints={blueprints} />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/super-admin" element={<SuperAdminDashboard />} />
-            <Route path="/password-reset" element={<PasswordResetForm />} />
           </Routes>
         </main>
         <Toaster position="top-right" />
