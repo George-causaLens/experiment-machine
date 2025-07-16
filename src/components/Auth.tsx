@@ -27,30 +27,30 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     checkAuth();
   }, [onAuthSuccess]);
 
-  const handleAuthStateChange = async (event: string, session: any) => {
-    if (event === 'SIGNED_IN' && session) {
-      // Validate user email format
-      if (session.user?.email && !SecurityUtils.isValidEmail(session.user.email)) {
-        console.error('Invalid email format detected');
-        await supabase.auth.signOut();
-        return;
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Validate user email format
+        if (session.user?.email && !SecurityUtils.isValidEmail(session.user.email)) {
+          console.error('Invalid email format detected');
+          supabase.auth.signOut();
+          return;
+        }
+        
+        onAuthSuccess?.();
       }
-      
-      onAuthSuccess?.();
-    }
-  };
+    });
+
+    return () => subscription.unsubscribe();
+  }, [onAuthSuccess]);
 
   const customTheme = {
     ...ThemeSupa,
     variables: {
-      ...ThemeSupa.variables,
-      default: {
-        ...ThemeSupa.variables?.default,
-        colors: {
-          ...ThemeSupa.variables?.default?.colors,
-          brand: '#3B82F6',
-          brandAccent: '#2563EB',
-        },
+      colors: {
+        brand: '#3B82F6',
+        brandAccent: '#2563EB',
       },
     },
   };
@@ -89,33 +89,6 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             redirectTo={window.location.origin}
             showLinks={true}
             view="sign_in"
-            onAuthStateChange={handleAuthStateChange}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email address',
-                  password_label: 'Password',
-                  button_label: 'Sign in',
-                  loading_button_label: 'Signing in...',
-                  social_provider_text: 'Sign in with {{provider}}',
-                  link_text: 'Already have an account? Sign in',
-                },
-                sign_up: {
-                  email_label: 'Email address',
-                  password_label: 'Password',
-                  button_label: 'Sign up',
-                  loading_button_label: 'Signing up...',
-                  social_provider_text: 'Sign up with {{provider}}',
-                  link_text: 'Don\'t have an account? Sign up',
-                },
-                forgotten_password: {
-                  email_label: 'Email address',
-                  button_label: 'Send reset instructions',
-                  loading_button_label: 'Sending...',
-                  link_text: 'Forgot your password?',
-                },
-              },
-            }}
           />
         </div>
         

@@ -75,8 +75,8 @@ const PasswordResetForm: React.FC = () => {
     try {
       // First, set the session using the recovery token
       const { data, error: sessionError } = await supabase.auth.setSession({
-        access_token: finalToken,
-        refresh_token: finalToken // For recovery tokens, we use the same token
+        access_token: finalToken || '',
+        refresh_token: finalToken || '' // For recovery tokens, we use the same token
       });
 
       if (sessionError) {
