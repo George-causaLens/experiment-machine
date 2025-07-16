@@ -84,16 +84,31 @@ function App() {
 
   // Load data from Supabase on component mount
   useEffect(() => {
-    if (!user || !appUser || appUser.status !== 'approved') return; // Only load data if user is authenticated and approved
+    if (!user || !appUser || appUser.status !== 'approved') {
+      console.log('Data loading skipped:', { 
+        hasUser: !!user, 
+        hasAppUser: !!appUser, 
+        appUserStatus: appUser?.status 
+      });
+      return; // Only load data if user is authenticated and approved
+    }
 
     const loadData = async () => {
       try {
+        console.log('Starting data load for user:', user.email);
         setLoading(true);
+        
         const [experimentsData, blueprintsData, icpProfilesData] = await Promise.all([
           DataService.getExperiments(),
           DataService.getBlueprints(),
           DataService.getICPProfiles()
         ]);
+        
+        console.log('Data loaded successfully:', {
+          experiments: experimentsData.length,
+          blueprints: blueprintsData.length,
+          icpProfiles: icpProfilesData.length
+        });
         
         setExperiments(experimentsData);
         setBlueprints(blueprintsData);
@@ -104,6 +119,10 @@ function App() {
         if (error instanceof Error && error.message.includes('fetch')) {
           console.error('This might be a Supabase connection issue. Check your environment variables.');
         }
+        // Set empty arrays to prevent infinite loading
+        setExperiments([]);
+        setBlueprints([]);
+        setICPProfiles([]);
       } finally {
         setLoading(false);
       }
