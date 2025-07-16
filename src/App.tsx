@@ -1,55 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
-import { User } from '@supabase/supabase-js';
+import { Toaster } from 'react-hot-toast';
+import { XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Navigation from './components/Navigation';
-import AuthComponent from './components/Auth';
-import PendingApproval from './components/PendingApproval';
-import SuperAdminDashboard from './components/SuperAdminDashboard';
 import Dashboard from './components/Dashboard';
 import ExperimentManager from './components/ExperimentManager';
 import CreateExperiment from './components/CreateExperiment';
 import ExperimentDetail from './components/ExperimentDetail';
 import BlueprintLibrary from './components/BlueprintLibrary';
 import CreateBlueprint from './components/CreateBlueprint';
-import BlueprintDetail from './components/BlueprintDetail';
 import EditBlueprint from './components/EditBlueprint';
+import BlueprintDetail from './components/BlueprintDetail';
 import ICPProfileManager from './components/ICPProfileManager';
 import CreateICPProfile from './components/CreateICPProfile';
 import AIRecommendations from './components/AIRecommendations';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Integrations from './components/Integrations';
-import { Experiment, Blueprint, ICPProfile, User as AppUser } from './types';
+import SuperAdminDashboard from './components/SuperAdminDashboard';
+import AuthComponent from './components/Auth';
+import PendingApproval from './components/PendingApproval';
+import PasswordResetForm from './components/PasswordResetForm';
+import { Experiment, Blueprint, ICPProfile } from './types';
 import { DataService } from './services/dataService';
 import { UserManagementService } from './services/userManagementService';
-import { XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import PasswordResetForm from './components/PasswordResetForm';
-
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [appUser, setAppUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [appUser, setAppUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [userStatusLoading, setUserStatusLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
   const [icpProfiles, setICPProfiles] = useState<ICPProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [userStatusLoading, setUserStatusLoading] = useState(true);
 
-  // Check for existing session on app load
+  // Handle password reset redirects
+  useEffect(() => {
+    const handlePasswordResetRedirect = () => {
+      // Check for password reset in URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPasswordReset = urlParams.get('type') === 'recovery' && urlParams.get('token');
+      
+      // Check for password reset in hash (Supabase sometimes uses this)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const isHashPasswordReset = hashParams.get('type') === 'recovery' && hashParams.get('access_token');
+      
+      console.log('Password reset check:', {
+        urlParams: Object.fromEntries(urlParams.entries()),
+        hashParams: Object.fromEntries(hashParams.entries()),
+        isPasswordReset,
+        isHashPasswordReset,
+        pathname: window.location.pathname,
+        hash: window.location.hash
+      });
+      
+      // Only redirect if we're not already on the password reset page
+      if ((isPasswordReset || isHashPasswordReset) && !window.location.pathname.includes('/password-reset')) {
+        const token = urlParams.get('token') || hashParams.get('access_token');
+        const type = urlParams.get('type') || hashParams.get('type');
+        
+        if (token && type === 'recovery') {
+          console.log('Redirecting to password reset form with token:', token);
+          // Clear the URL and redirect to password reset form
+          window.history.replaceState({}, document.title, '/password-reset');
+          window.location.replace(`/password-reset?token=${token}&type=${type}`);
+        }
+      }
+    };
+
+    handlePasswordResetRedirect();
+  }, []);
+
+  // Get session on component mount
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
+      try {
+        setAuthLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Error getting session:', error);
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
     };
 
     getSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setUser(session?.user ?? null);
         setAuthLoading(false);
       }
@@ -57,8 +99,6 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-
 
   // Check user approval status when user changes
   useEffect(() => {
@@ -218,35 +258,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  // Check if this is a password reset request
-  const urlParams = new URLSearchParams(window.location.search);
-  const isPasswordReset = urlParams.get('type') === 'recovery' && urlParams.get('token');
-  
-  // Also check for hash-based redirects from Supabase
-  const hashParams = new URLSearchParams(window.location.hash.substring(1));
-  const isHashPasswordReset = hashParams.get('type') === 'recovery' && hashParams.get('access_token');
-  
-  // Only redirect if we're not already on the password reset page
-  if ((isPasswordReset || isHashPasswordReset) && !window.location.pathname.includes('/password-reset')) {
-    const token = urlParams.get('token') || hashParams.get('access_token');
-    const type = urlParams.get('type') || hashParams.get('type');
-    
-    if (token && type === 'recovery') {
-      console.log('Redirecting to password reset form with token');
-      // Clear the URL and redirect to password reset form
-      window.history.replaceState({}, document.title, '/password-reset');
-      window.location.href = `/password-reset?token=${token}&type=${type}`;
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Redirecting to password reset...</p>
-          </div>
-        </div>
-      );
-    }
   }
 
   if (!user) {
