@@ -64,7 +64,7 @@ export class UserManagementService {
     console.log('Pending approvals data:', data);
     
     return (data || []).map((user: any) => ({
-      id: user.id,
+      id: user.user_id,
       email: user.email,
       full_name: user.full_name,
       created_at: new Date(user.created_at),
