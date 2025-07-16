@@ -43,6 +43,10 @@ function App() {
         setICPProfiles(icpProfilesData);
       } catch (error) {
         console.error('Error loading data:', error);
+        // Show a more user-friendly error message
+        if (error instanceof Error && error.message.includes('fetch')) {
+          console.error('This might be a Supabase connection issue. Check your environment variables.');
+        }
       } finally {
         setLoading(false);
       }
