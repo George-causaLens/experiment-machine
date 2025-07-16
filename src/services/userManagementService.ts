@@ -61,6 +61,53 @@ export class UserManagementService {
     }));
   }
 
+  // Get current user's profile
+  static async getCurrentUser(): Promise<User | null> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    try {
+      // Try to get user data from the users table
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching current user:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in getCurrentUser:', error);
+      return null;
+    }
+  }
+
+  // Check if current user is super admin
+  static async isSuperAdmin(): Promise<boolean> {
+    try {
+      const user = await this.getCurrentUser();
+      return user?.role === 'super_admin' && user?.status === 'approved';
+    } catch (error) {
+      console.error('Error checking super admin status:', error);
+      return false;
+    }
+  }
+
+  // Check if current user is approved
+  static async isUserApproved(): Promise<boolean> {
+    try {
+      const user = await this.getCurrentUser();
+      return user?.status === 'approved';
+    } catch (error) {
+      console.error('Error checking user approval status:', error);
+      return false;
+    }
+  }
+
   // Approve a user
   static async approveUser(userId: string): Promise<void> {
     const { error } = await supabase.rpc('approve_user', { user_id: userId });
