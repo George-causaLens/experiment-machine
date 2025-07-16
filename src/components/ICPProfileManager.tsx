@@ -9,9 +9,7 @@ import {
   FunnelIcon,
   BuildingOfficeIcon,
   GlobeAltIcon,
-  CurrencyDollarIcon,
-  CogIcon,
-  TagIcon
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 import { ICPProfile } from '../types';
 

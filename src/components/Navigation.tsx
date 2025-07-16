@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation, NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   ChartBarIcon, 
   BeakerIcon, 
   BookOpenIcon, 
-  CogIcon,
   Bars3Icon,
   XMarkIcon,
   LightBulbIcon,

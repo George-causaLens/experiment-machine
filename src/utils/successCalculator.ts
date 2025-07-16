@@ -1,7 +1,6 @@
 import { Experiment, SuccessScoreCalculation } from '../types';
 
 export const calculateSuccessScore = (experiment: Experiment): SuccessScoreCalculation => {
-  const { successCriteria, metrics } = experiment;
   
   // Calculate target achievement (60% weight)
   const primaryGoalScore = calculatePrimaryGoalScore(experiment);
@@ -74,7 +73,8 @@ const calculatePrimaryGoalScore = (experiment: Experiment): number => {
 };
 
 const calculateSecondaryGoalsScore = (experiment: Experiment): number => {
-  const { successCriteria, metrics } = experiment;
+  const { successCriteria } = experiment;
+  const { metrics } = experiment;
   const { secondaryGoals, targetMetrics } = successCriteria;
   
   if (!secondaryGoals || secondaryGoals.length === 0) return 100; // No secondary goals = perfect score

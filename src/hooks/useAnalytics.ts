@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { Experiment, Blueprint } from '../types';
-import { calculateROI } from '../utils/successCalculator';
+import { Experiment } from '../types';
 
 interface AnalyticsFilters {
   status: string[];

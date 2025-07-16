@@ -1,5 +1,5 @@
 import { Experiment, Blueprint, AIRecommendation, ExperimentVariable } from '../types';
-import { PerformanceAnalyzer, ICPPerformance, ChannelPerformance, StrategyPerformance } from './performanceAnalyzer';
+import { PerformanceAnalyzer, ICPPerformance } from './performanceAnalyzer';
 
 export class RecommendationEngine {
   private analyzer: PerformanceAnalyzer;
@@ -47,8 +47,6 @@ export class RecommendationEngine {
     const topPerformingExperiments = this.analyzer.findTopPerformingExperiments(experiments, 3);
     const icpPerformance = this.analyzer.analyzeICPPerformance(experiments);
     const untappedICPs = this.analyzer.findUntappedICPs(experiments, blueprints);
-
-    // Analysis complete
 
     // For each top-performing experiment, suggest applying to untapped ICPs
     topPerformingExperiments.forEach((topExp, index) => {
