@@ -24,7 +24,7 @@ import { Experiment, Blueprint, ICPProfile, User as AppUser } from './types';
 import { DataService } from './services/dataService';
 import { UserManagementService } from './services/userManagementService';
 import { XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-
+import PasswordResetForm from './components/PasswordResetForm';
 
 
 function App() {
@@ -218,6 +218,14 @@ function App() {
     );
   }
 
+  // Check if this is a password reset request
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPasswordReset = urlParams.get('type') === 'recovery' && urlParams.get('token');
+  
+  if (isPasswordReset) {
+    return <PasswordResetForm />;
+  }
+
   if (!user) {
     return (
       <AuthComponent 
@@ -343,6 +351,7 @@ function App() {
             <Route path="/analytics" element={<AnalyticsDashboard experiments={experiments} blueprints={blueprints} />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/super-admin" element={<SuperAdminDashboard />} />
+            <Route path="/password-reset" element={<PasswordResetForm />} />
           </Routes>
         </main>
         <Toaster position="top-right" />

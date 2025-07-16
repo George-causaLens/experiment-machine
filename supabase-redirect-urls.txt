@@ -1,0 +1,14 @@
+# Supabase Redirect URLs to Add
+# Go to your Supabase Dashboard → Authentication → Settings → Redirect URLs
+# Add these URLs:
+
+https://experiment-machine.vercel.app
+https://experiment-machine.vercel.app/
+https://experiment-machine.vercel.app/password-reset
+https://experiment-machine.vercel.app/auth/callback
+
+# Site URL should be:
+https://experiment-machine.vercel.app
+
+# IMPORTANT: Remove any localhost URLs from the redirect list
+# This will prevent the security vulnerability where users are redirected to localhost 
