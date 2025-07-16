@@ -21,24 +21,13 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         <div className="bg-white py-8 px-6 shadow rounded-lg">
           <Auth
             supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#3B82F6',
-                    brandAccent: '#2563EB',
-                  },
-                },
-              },
-            }}
+            appearance={{ theme: ThemeSupa }}
             providers={[]}
             redirectTo={window.location.origin}
+            showLinks={true}
+            view="sign_in"
+            onSuccess={onAuthSuccess}
           />
-        </div>
-        
-        <div className="text-center text-sm text-gray-500">
-          <p>Protected by Supabase Auth</p>
         </div>
       </div>
     </div>
