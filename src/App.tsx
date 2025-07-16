@@ -84,18 +84,39 @@ function App() {
 
   // Load data from Supabase on component mount
   useEffect(() => {
-    if (!user || !appUser || appUser.status !== 'approved') {
-      console.log('Data loading skipped:', { 
-        hasUser: !!user, 
-        hasAppUser: !!appUser, 
-        appUserStatus: appUser?.status 
-      });
+    console.log('Auth state check:', { 
+      hasUser: !!user, 
+      hasAppUser: !!appUser, 
+      appUserStatus: appUser?.status,
+      userEmail: user?.email 
+    });
+
+    if (!user) {
+      console.log('No user - clearing data');
+      setExperiments([]);
+      setBlueprints([]);
+      setICPProfiles([]);
+      setLoading(false);
+      return;
+    }
+
+    if (!appUser) {
+      console.log('No app user - waiting for user status check');
+      return; // Wait for user status check to complete
+    }
+
+    if (appUser.status !== 'approved') {
+      console.log('User not approved - clearing data');
+      setExperiments([]);
+      setBlueprints([]);
+      setICPProfiles([]);
+      setLoading(false);
       return; // Only load data if user is authenticated and approved
     }
 
     const loadData = async () => {
       try {
-        console.log('Starting data load for user:', user.email);
+        console.log('Starting data load for approved user:', user.email);
         setLoading(true);
         
         const [experimentsData, blueprintsData, icpProfilesData] = await Promise.all([
@@ -267,6 +288,23 @@ function App() {
               Sign Out
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CRITICAL SECURITY CHECK: Only show main app if user is authenticated AND approved
+  if (!appUser || appUser.status !== 'approved') {
+    console.log('Security check failed - user not properly authenticated:', {
+      hasAppUser: !!appUser,
+      appUserStatus: appUser?.status,
+      userEmail: user?.email
+    });
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying your access...</p>
         </div>
       </div>
     );

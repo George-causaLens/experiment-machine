@@ -26,7 +26,6 @@ const AuthComponent: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             redirectTo={window.location.origin}
             showLinks={true}
             view="sign_in"
-            onSuccess={onAuthSuccess}
           />
         </div>
       </div>
