@@ -98,7 +98,7 @@ const PasswordResetForm: React.FC = () => {
         // Sign out the user to ensure they need to log in again
         await supabase.auth.signOut();
         setTimeout(() => {
-          navigate('/');
+          navigate('/', { replace: true });
         }, 2000);
       }
     } catch (error) {
