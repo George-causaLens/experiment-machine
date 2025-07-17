@@ -109,8 +109,6 @@ const calculateSecondaryGoalsScore = (experiment: Experiment): number => {
 };
 
 const calculateEfficiencyScore = (experiment: Experiment): number => {
-  const { metrics, successCriteria } = experiment;
-  
   // Time efficiency (how quickly goals were achieved)
   const timeEfficiency = calculateTimeEfficiency(experiment);
   

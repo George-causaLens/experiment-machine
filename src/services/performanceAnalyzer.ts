@@ -182,7 +182,9 @@ export class PerformanceAnalyzer {
     // Find blueprints with ICPs not yet targeted
     const untappedICPs: string[] = [];
     blueprints.forEach(bp => {
-      const blueprintICP = `${bp.targetRole} at ${bp.companySize} companies in ${bp.industry}`;
+      // Use the first target role for ICP generation
+      const targetRole = bp.targetRoles.length > 0 ? bp.targetRoles[0] : 'Unknown Role';
+      const blueprintICP = `${targetRole} at ${bp.companySize} companies in ${bp.industry}`;
       if (!targetedICPs.has(blueprintICP)) {
         untappedICPs.push(blueprintICP);
       }

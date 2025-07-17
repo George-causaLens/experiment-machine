@@ -653,8 +653,8 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
                 <div className="font-medium text-blue-900">{selectedBlueprint.industry}</div>
               </div>
               <div>
-                <span className="text-blue-700">Target Role:</span>
-                <div className="font-medium text-blue-900">{selectedBlueprint.targetRole}</div>
+                <span className="text-blue-700">Target Roles:</span>
+                <div className="font-medium text-blue-900">{selectedBlueprint.targetRoles.join(', ')}</div>
               </div>
               <div>
                 <span className="text-blue-700">Company Size:</span>

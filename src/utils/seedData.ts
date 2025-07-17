@@ -1,5 +1,4 @@
 import { DataService } from '../services/dataService';
-import { Experiment, Blueprint, ICPProfile } from '../types';
 
 export const seedSampleData = async () => {
   try {
@@ -10,7 +9,6 @@ export const seedSampleData = async () => {
       name: 'Manufacturing COO Document Automation',
       description: 'Automate PDF categorization and document processing for Manufacturing COOs at large companies',
       industry: 'Manufacturing',
-      targetRole: 'COO',
       companySize: '$100M+ revenue',
       automation: 'PDF → Categorization automation',
       valueProposition: '$50M annual value through streamlined document processing',
@@ -20,6 +18,9 @@ export const seedSampleData = async () => {
       totalRevenue: 50000000,
       conversionRate: 22.5,
       tags: ['manufacturing', 'coo', 'document-automation', 'pdf-processing'],
+      targetRoles: ['COO'],
+      companyRevenue: ['$100M - $500M', '$500M - $1B', '$1B - $5B', '$5B - $10B', '$10B+'],
+      painPoints: ['Operational efficiency', 'Process automation', 'Manual reporting'],
       usageCount: 15,
       relatedExperiments: []
     });
@@ -28,7 +29,6 @@ export const seedSampleData = async () => {
       name: 'Financial Services CTO Fraud Detection',
       description: 'Automate transaction monitoring and fraud detection for Financial Services CTOs',
       industry: 'Financial Services',
-      targetRole: 'CTO',
       companySize: '$500M+ revenue',
       automation: 'Transaction → Fraud Detection',
       valueProposition: '$25M annual savings through automated fraud prevention',
@@ -38,6 +38,9 @@ export const seedSampleData = async () => {
       totalRevenue: 25000000,
       conversionRate: 18.2,
       tags: ['financial-services', 'cto', 'fraud-detection', 'transaction-monitoring'],
+      targetRoles: ['CTO'],
+      companyRevenue: ['$500M - $1B', '$1B - $5B', '$5B - $10B', '$10B+'],
+      painPoints: ['Risk exposure', 'Manual underwriting', 'Fraud detection delays'],
       usageCount: 23,
       relatedExperiments: []
     });
