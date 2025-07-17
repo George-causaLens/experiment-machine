@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  LightBulbIcon, 
   PlusIcon, 
   MagnifyingGlassIcon,
   TrashIcon,
   PencilIcon,
-  ExternalLinkIcon
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { Idea } from '../types';
 import { DataService } from '../services/dataService';
@@ -171,7 +170,7 @@ const IdeasHub: React.FC<IdeasHubProps> = ({ onAddExperiment }) => {
                           rel="noopener noreferrer"
                           className="flex items-center text-xs text-primary-600 hover:text-primary-800"
                         >
-                          <ExternalLinkIcon className="w-3 h-3 mr-1" />
+                          <ArrowTopRightOnSquareIcon className="w-3 h-3 mr-1" />
                           {url.title || 'Link'}
                         </a>
                       ))}

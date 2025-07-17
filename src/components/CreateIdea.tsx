@@ -46,7 +46,6 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const [newOutreachStrategy, setNewOutreachStrategy] = useState('');
   const [newContentType, setNewContentType] = useState('');
   const [newMessagingFocus, setNewMessagingFocus] = useState('');
-  const [newTag, setNewTag] = useState('');
 
   // Predefined options (same as CreateExperiment)
   const predefinedJobTitles = [
