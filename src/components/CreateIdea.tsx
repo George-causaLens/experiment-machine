@@ -298,6 +298,8 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submitted, formData:', formData);
+    
     if (!formData.name.trim()) {
       alert('Please enter an idea name');
       return;
@@ -325,10 +327,19 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       tags: formData.tags
     };
 
+    console.log('Calling DataService.createIdea with:', ideaData);
+    
     const newIdea = await DataService.createIdea(ideaData);
+    console.log('DataService.createIdea result:', newIdea);
+    
     if (newIdea) {
+      console.log('Calling onAddIdea with:', newIdea);
       onAddIdea(newIdea);
+      console.log('Navigating to /ideas');
       navigate('/ideas');
+    } else {
+      console.error('Failed to create idea - DataService.createIdea returned null');
+      alert('Failed to save idea. Please try again.');
     }
   };
 

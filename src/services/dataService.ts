@@ -393,32 +393,42 @@ export class DataService {
 
   static async createIdea(idea: Omit<Idea, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Idea | null> {
     try {
+      console.log('DataService.createIdea called with:', idea);
+      
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user);
+      
       if (!user) throw new Error('User not authenticated');
+
+      const insertData = {
+        user_id: user.id,
+        name: idea.name,
+        description: idea.description,
+        urls: idea.urls,
+        target_roles: idea.targetRoles,
+        industries: idea.industries,
+        company_sizes: idea.companySizes,
+        company_revenue: idea.companyRevenue,
+        pain_points: idea.painPoints,
+        distribution_channels: idea.distributionChannels,
+        outreach_strategies: idea.outreachStrategies,
+        content_types: idea.contentTypes,
+        messaging_focus: idea.messagingFocus,
+        priority: idea.priority,
+        effort: idea.effort,
+        impact: idea.impact,
+        tags: idea.tags
+      };
+      
+      console.log('Inserting data:', insertData);
 
       const { data, error } = await supabase
         .from('ideas')
-        .insert({
-          user_id: user.id,
-          name: idea.name,
-          description: idea.description,
-          urls: idea.urls,
-          target_roles: idea.targetRoles,
-          industries: idea.industries,
-          company_sizes: idea.companySizes,
-          company_revenue: idea.companyRevenue,
-          pain_points: idea.painPoints,
-          distribution_channels: idea.distributionChannels,
-          outreach_strategies: idea.outreachStrategies,
-          content_types: idea.contentTypes,
-          messaging_focus: idea.messagingFocus,
-          priority: idea.priority,
-          effort: idea.effort,
-          impact: idea.impact,
-          tags: idea.tags
-        })
+        .insert(insertData)
         .select()
         .single();
+
+      console.log('Supabase response - data:', data, 'error:', error);
 
       if (error) throw error;
       return transformIdea(data);
