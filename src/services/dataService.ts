@@ -401,6 +401,24 @@ export class DataService {
       
       if (!user) throw new Error('User not authenticated');
 
+      // Check for existing idea with same name from same user
+      const { data: existingIdeas, error: checkError } = await supabase
+        .from('ideas')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .eq('name', idea.name.trim())
+        .limit(1);
+
+      if (checkError) {
+        console.error('❌ Error checking for existing ideas:', checkError);
+        throw checkError;
+      }
+
+      if (existingIdeas && existingIdeas.length > 0) {
+        console.log('❌ BLOCKED: Idea with same name already exists:', existingIdeas[0]);
+        throw new Error('An idea with this name already exists');
+      }
+
       const insertData = {
         user_id: user.id,
         name: idea.name,

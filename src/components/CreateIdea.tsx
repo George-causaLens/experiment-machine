@@ -263,6 +263,16 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
     'Exclusive Offer', 'Free Trial', 'Demo Request', 'Consultation'
   ];
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear submission state on unmount
+      isSubmittingRef.current = false;
+      submissionIdRef.current = null;
+      console.log('CreateIdea component unmounted, cleared submission state');
+    };
+  }, []);
+
   const addItem = (field: keyof typeof formData, value: string, setter: (value: string) => void) => {
     if (value.trim() && !(formData[field] as string[])?.includes(value.trim())) {
       setFormData(prev => ({
@@ -284,15 +294,6 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   useEffect(() => {
     setIsSubmitting(isSubmittingRef.current);
   }, []); // Empty dependency array to run only once
-
-  // Cleanup effect to clear submission ID on unmount
-  useEffect(() => {
-    return () => {
-      // Clear submission ID when component unmounts
-      submissionIdRef.current = null;
-      isSubmittingRef.current = false;
-    };
-  }, []);
 
   const addUrl = () => {
     setFormData(prev => ({
@@ -342,13 +343,21 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       return;
     }
     
+    // Additional guard: check if form is already disabled
+    if (formRef.current && formRef.current.style.pointerEvents === 'none') {
+      console.log('❌ BLOCKED: Form already disabled, ignoring submission');
+      return;
+    }
+    
     // Set submission ID to prevent duplicates
     submissionIdRef.current = currentSubmissionId;
     
-    // Immediately disable the form
+    // Immediately disable the form and set submitting state
     if (formRef.current) {
       formRef.current.style.pointerEvents = 'none';
     }
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
     
     console.log('✅ PROCEEDING: Form submission starting');
     console.log('Form submitted, formData:', formData);
@@ -360,13 +369,12 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       if (formRef.current) {
         formRef.current.style.pointerEvents = 'auto';
       }
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       // Clear submission ID on validation error
       submissionIdRef.current = null;
       return;
     }
-
-    console.log('🔄 Setting isSubmitting to true');
-    isSubmittingRef.current = true;
 
     try {
       // Filter out empty URLs
@@ -408,10 +416,23 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       }
     } catch (error) {
       console.error('❌ Error creating idea:', error);
-      alert('Failed to save idea. Please try again.');
+      
+      // Show specific error message for duplicate ideas
+      if (error instanceof Error) {
+        if (error.message.includes('already exists')) {
+          alert('An idea with this name already exists. Please choose a different name.');
+        } else if (error.message.includes('duplicate key')) {
+          alert('An idea with this name already exists. Please choose a different name.');
+        } else {
+          alert(`Failed to save idea: ${error.message}`);
+        }
+      } else {
+        alert('Failed to save idea. Please try again.');
+      }
     } finally {
       console.log('🔄 Setting isSubmitting to false');
       isSubmittingRef.current = false;
+      setIsSubmitting(false);
       submissionIdRef.current = null; // Clear submission ID on completion
       // Re-enable the form
       if (formRef.current) {

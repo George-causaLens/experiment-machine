@@ -127,43 +127,31 @@ function App() {
     checkUserStatus();
   }, [user]);
 
-  // Load data from Supabase on component mount
+  // Load data when user is authenticated and approved
   useEffect(() => {
-    console.log('Auth state check:', { 
-      hasUser: !!user, 
-      hasAppUser: !!appUser, 
-      appUserStatus: appUser?.status,
-      userEmail: user?.email 
-    });
-
-    if (!user) {
-      console.log('No user - clearing data');
-      setExperiments([]);
-      setBlueprints([]);
-      setICPProfiles([]);
-      setIdeas([]);
-      setLoading(false);
-      return;
-    }
-
-    if (!appUser) {
-      console.log('No app user - waiting for user status check');
-      return; // Wait for user status check to complete
-    }
-
-    if (appUser.status !== 'approved') {
-      console.log('User not approved - clearing data');
-      setExperiments([]);
-      setBlueprints([]);
-      setICPProfiles([]);
-      setIdeas([]);
+    if (!user || !appUser || appUser.status !== 'approved') {
+      console.log('User not ready for data loading:', { 
+        hasUser: !!user, 
+        hasAppUser: !!appUser, 
+        status: appUser?.status 
+      });
       setLoading(false);
       return; // Only load data if user is authenticated and approved
     }
 
+    // Prevent multiple simultaneous data loads
+    let isMounted = true;
+    let loadInProgress = false;
+
     const loadData = async () => {
+      if (loadInProgress) {
+        console.log('Data load already in progress, skipping');
+        return;
+      }
+
       try {
         console.log('Starting data load for approved user:', user.email);
+        loadInProgress = true;
         setLoading(true);
         
         const [experimentsData, blueprintsData, icpProfilesData, ideasData] = await Promise.all([
@@ -172,6 +160,11 @@ function App() {
           DataService.getICPProfiles(),
           DataService.getIdeas()
         ]);
+        
+        if (!isMounted) {
+          console.log('Component unmounted during data load, aborting');
+          return;
+        }
         
         console.log('Data loaded successfully:', {
           experiments: experimentsData.length,
@@ -191,16 +184,26 @@ function App() {
           console.error('This might be a Supabase connection issue. Check your environment variables.');
         }
         // Set empty arrays to prevent infinite loading
-        setExperiments([]);
-        setBlueprints([]);
-        setICPProfiles([]);
-        setIdeas([]);
+        if (isMounted) {
+          setExperiments([]);
+          setBlueprints([]);
+          setICPProfiles([]);
+          setIdeas([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
+        loadInProgress = false;
       }
     };
 
     loadData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [user?.id, appUser?.status]); // Only reload when user ID or approval status changes
 
   const addExperiment = async (experiment: Omit<Experiment, 'id' | 'createdAt'>) => {

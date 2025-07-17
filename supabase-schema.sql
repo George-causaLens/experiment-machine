@@ -140,4 +140,7 @@ CREATE INDEX IF NOT EXISTS idx_ideas_user_id ON ideas(user_id);
 CREATE INDEX IF NOT EXISTS idx_ideas_priority ON ideas(priority);
 CREATE INDEX IF NOT EXISTS idx_ideas_effort ON ideas(effort);
 CREATE INDEX IF NOT EXISTS idx_ideas_impact ON ideas(impact);
-CREATE INDEX IF NOT EXISTS idx_ideas_created_at ON ideas(created_at); 
+CREATE INDEX IF NOT EXISTS idx_ideas_created_at ON ideas(created_at);
+
+-- Add unique constraint to prevent duplicate idea names per user
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ideas_user_name_unique ON ideas(user_id, name); 
