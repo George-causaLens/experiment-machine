@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpenIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { 
+  BookOpenIcon, 
+  ArrowLeftIcon,
+  BuildingOfficeIcon,
+  CurrencyDollarIcon,
+  ExclamationTriangleIcon,
+  PlusIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 import { Blueprint } from '../types';
 
 interface CreateBlueprintProps {
@@ -14,22 +22,217 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
     name: '',
     description: '',
     industry: '',
-    targetRole: '',
+    targetRoles: [] as string[],
     companySize: '',
+    companyRevenue: [] as string[],
+    painPoints: [] as string[],
     automation: '',
     valueProposition: ''
   });
 
+  const [newTargetRole, setNewTargetRole] = useState('');
+  const [newCompanyRevenue, setNewCompanyRevenue] = useState('');
+  const [newPainPoint, setNewPainPoint] = useState('');
+
+  // Predefined options for dropdowns (same as ICP profile creation)
+  const predefinedJobTitles = [
+    // CROSS-INDUSTRY (Operational + Analytical Titles)
+    { group: 'CROSS-INDUSTRY (Operational + Analytical Titles)', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Operating Officer (COO)',
+    'Chief Transformation Officer (CTO)',
+    'Chief Supply Chain Officer (CSCO)',
+    'Chief Commercial Officer (CCO)',
+    'Chief Financial Officer (CFO)',
+    'Chief Analytics Officer (CAO)',
+    'Chief Data Officer (CDO)',
+    'Chief Technology Officer (CTO)',
+    'Chief Information Officer (CIO)',
+    { group: 'C-1 to C-3 (Operational Leadership)', type: 'subheader' },
+    'VP / SVP / Director of Operations',
+    'VP / Director of Supply Chain',
+    'VP / Director of Process Excellence / Operational Excellence',
+    'VP / Director of Commercial Operations',
+    'VP / Director of Shared Services / Business Services',
+    'VP / Director of Global Business Services (GBS)',
+    'VP / Director of Digital Transformation',
+    'VP / Director of Procurement Operations',
+    'Head of Business Process Automation / Intelligent Automation',
+    { group: 'C-1 to C-3 (Analytical Leadership)', type: 'subheader' },
+    'VP / Director of Analytics & Insights',
+    'VP / Director of Data Science',
+    'VP / Director of Reporting & BI',
+    'VP / Director of Forecasting / Planning & Analysis',
+    'Head of Advanced Analytics',
+    'Head of Data Platforms / Engineering',
+    { group: 'RETAIL / CPG', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Merchandising Officer',
+    'Chief Supply Chain Officer',
+    'Chief Marketing Officer (for campaign analytics ops)',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Demand Planning',
+    'VP / Director of Inventory & Logistics',
+    'Director of Retail Operations',
+    'Director of Marketing Analytics',
+    'Head of Category Insights',
+    'Director of Trade Promotion Effectiveness',
+    'Head of Sales & Channel Performance',
+    { group: 'PHARMACEUTICALS', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Commercial Officer',
+    'Chief Medical Officer (for clinical ops)',
+    'Chief Scientific Officer',
+    'Chief Operating Officer (often covers both R&D and Commercial Ops)',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Clinical Operations',
+    'VP / Director of R&D Operations',
+    'VP / Director of Commercial Excellence',
+    'VP / Director of Medical Affairs Operations',
+    'Director of Field Force Effectiveness',
+    { group: 'FINANCIAL SERVICES', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Risk Officer (CRO)',
+    'Chief Underwriting Officer (Insurance)',
+    'Chief Operating Officer',
+    'Chief Analytics Officer',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Risk & Compliance Operations',
+    'VP / Director of Credit Analytics',
+    'Director of Fraud & Financial Crime Analytics',
+    'VP / Director of Claims Operations (Insurance)',
+    'Director of Customer Intelligence',
+    'Head of Financial Planning & Analysis (FP&A)',
+    'Head of Regulatory Reporting Automation',
+    { group: 'MANUFACTURING / INDUSTRIALS', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Supply Chain Officer',
+    'Chief Operations Officer',
+    'Chief Manufacturing Officer',
+    'Chief Digital Officer / CIO',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Supply Chain Analytics',
+    'VP / Director of Manufacturing Excellence',
+    'Director of Quality Analytics'
+  ];
+
+  const predefinedCompanyRevenue = [
+    'Under $1M', '$1M - $10M', '$10M - $50M', '$50M - $100M', '$100M - $500M',
+    '$500M - $1B', '$1B - $5B', '$5B - $10B', '$10B+'
+  ];
+
+  const predefinedPainPoints = [
+    // General Pain Points (Operational + Analytical)
+    { group: 'General Pain Points (Operational + Analytical)', type: 'header' },
+    'Operational efficiency',
+    'Process automation',
+    'Manual reporting',
+    'Forecasting inaccuracy',
+    'Delayed insights',
+    'Siloed data',
+    'Decision latency',
+    'High labor costs',
+    'Workflow bottlenecks',
+    'Repetitive tasks',
+    'Tool sprawl',
+    'Poor data quality',
+    'Slow time-to-value',
+    'Legacy systems',
+    'Resource constraints',
+    'Insight inactionability',
+    'Compliance risk',
+    'Scaling limitations',
+    'Human error',
+    'Audit complexity',
+    'Change resistance',
+    'Demand unpredictability',
+    'Data overload',
+    'Underused analytics',
+    'Inefficient handoffs',
+    'Analyst dependency',
+    { group: 'Retail / CPG Pain Points', type: 'header' },
+    'Demand volatility',
+    'Inventory imbalances',
+    'Trade inefficiency',
+    'Merchandising delays',
+    'Pricing complexity',
+    'Promotion performance',
+    'Supply disruptions',
+    'Channel misalignment',
+    'Sales forecasting gaps',
+    'Planogram inefficiency',
+    'SKU proliferation',
+    'Store execution gaps',
+    { group: 'Pharmaceuticals Pain Points', type: 'header' },
+    'Trial enrollment delays',
+    'Field force inefficiency',
+    'Commercial waste',
+    'Market access complexity',
+    'Regulatory overhead',
+    'R&D cycle time',
+    'Site activation delays',
+    'HCP targeting issues',
+    'Data integration issues',
+    'Launch forecasting gaps',
+    'Medical affairs backlog',
+    'Compliance documentation',
+    { group: 'Financial Services Pain Points', type: 'header' },
+    'Risk exposure',
+    'Manual underwriting',
+    'Claims backlog',
+    'Fraud detection delays',
+    'Credit scoring gaps',
+    'KYC inefficiency',
+    'Regulatory reporting',
+    'Policy churn analysis',
+    'Customer attrition risk',
+    'Branch performance gaps',
+    'Audit trail gaps',
+    'Pricing inconsistency',
+    { group: 'Manufacturing / Industrials Pain Points', type: 'header' },
+    'Downtime prediction',
+    'Root cause delay',
+    'Quality variation',
+    'Maintenance inefficiency',
+    'Throughput stagnation',
+    'Supply planning errors',
+    'Parts inventory bloat',
+    'Procurement delays',
+    'Schedule variability',
+    'Energy inefficiency',
+    'Waste identification',
+    'Equipment failure'
+  ];
+
+  const addItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', value: string, setter: (value: string) => void) => {
+    if (value.trim() && !formData[field].includes(value.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: [...prev[field], value.trim()]
+      }));
+      setter('');
+    }
+  };
+
+  const removeItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', itemToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].filter(item => item !== itemToRemove)
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newBlueprint = {
+    const newBlueprint: Blueprint = {
       id: `bp-${Date.now()}`,
       name: formData.name,
       description: formData.description,
       industry: formData.industry,
-      targetRole: formData.targetRole,
+      targetRoles: formData.targetRoles,
       companySize: formData.companySize,
+      companyRevenue: formData.companyRevenue,
+      painPoints: formData.painPoints,
       automation: formData.automation,
       valueProposition: formData.valueProposition,
       successRate: 0,
@@ -70,7 +273,7 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Blueprint Name *
               </label>
@@ -107,19 +310,6 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Target Role *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.targetRole}
-                onChange={(e) => setFormData(prev => ({ ...prev, targetRole: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="e.g., COO, CTO, VP Operations"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Company Size *
               </label>
               <select
@@ -129,12 +319,14 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">Select Company Size</option>
-                <option value="$1M-$10M revenue">$1M-$10M revenue</option>
-                <option value="$10M-$50M revenue">$10M-$50M revenue</option>
-                <option value="$50M-$100M revenue">$50M-$100M revenue</option>
-                <option value="$100M+ revenue">$100M+ revenue</option>
-                <option value="$500M+ revenue">$500M+ revenue</option>
-                <option value="$1B+ revenue">$1B+ revenue</option>
+                <option value="1-10 employees">1-10 employees</option>
+                <option value="11-50 employees">11-50 employees</option>
+                <option value="51-200 employees">51-200 employees</option>
+                <option value="201-500 employees">201-500 employees</option>
+                <option value="501-1000 employees">501-1000 employees</option>
+                <option value="1001-5000 employees">1001-5000 employees</option>
+                <option value="5001-10000 employees">5001-10000 employees</option>
+                <option value="10000+ employees">10000+ employees</option>
               </select>
             </div>
           </div>
@@ -150,6 +342,158 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Describe the business use case and value proposition..."
             />
+          </div>
+        </div>
+
+        {/* Target Roles */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <BuildingOfficeIcon className="w-5 h-5 mr-2 text-primary-600" />
+            Target Roles
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <select
+                value={newTargetRole}
+                onChange={(e) => setNewTargetRole(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select from predefined options</option>
+                {predefinedJobTitles.map((item, index) => {
+                  if (typeof item === 'string') {
+                    return <option key={index} value={item}>{item}</option>;
+                  } else if (item.type === 'header') {
+                    return <optgroup key={index} label={item.group} className="font-bold text-gray-900 bg-gray-100"></optgroup>;
+                  } else if (item.type === 'subheader') {
+                    return <optgroup key={index} label={item.group} className="font-semibold text-gray-700 bg-gray-50"></optgroup>;
+                  }
+                  return null;
+                })}
+              </select>
+              <button
+                type="button"
+                onClick={() => addItem('targetRoles', newTargetRole, setNewTargetRole)}
+                className="btn-secondary"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.targetRoles.map((role, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800"
+                >
+                  {role}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('targetRoles', role)}
+                    className="ml-2 text-primary-600 hover:text-primary-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Company Revenue */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <CurrencyDollarIcon className="w-5 h-5 mr-2 text-primary-600" />
+            Company Revenue
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <select
+                value={newCompanyRevenue}
+                onChange={(e) => setNewCompanyRevenue(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select revenue range</option>
+                {predefinedCompanyRevenue.map(revenue => (
+                  <option key={revenue} value={revenue}>{revenue}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => addItem('companyRevenue', newCompanyRevenue, setNewCompanyRevenue)}
+                className="btn-secondary"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.companyRevenue.map((revenue, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
+                >
+                  {revenue}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('companyRevenue', revenue)}
+                    className="ml-2 text-yellow-600 hover:text-yellow-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Pain Points */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <ExclamationTriangleIcon className="w-5 h-5 mr-2 text-primary-600" />
+            Pain Points
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <select
+                value={newPainPoint}
+                onChange={(e) => setNewPainPoint(e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select pain point</option>
+                {predefinedPainPoints.map(pain => {
+                  if (typeof pain === 'string') {
+                    return <option key={pain} value={pain}>{pain}</option>;
+                  } else if (pain.type === 'header') {
+                    return <optgroup key={pain.group} label={pain.group} className="font-bold text-gray-900 bg-gray-100"></optgroup>;
+                  } else if (pain.type === 'subheader') {
+                    return <optgroup key={pain.group} label={pain.group} className="font-semibold text-gray-700 bg-gray-50"></optgroup>;
+                  }
+                  return null;
+                })}
+              </select>
+              <button
+                type="button"
+                onClick={() => addItem('painPoints', newPainPoint, setNewPainPoint)}
+                className="btn-secondary"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {formData.painPoints.map((pain, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
+                >
+                  {pain}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('painPoints', pain)}
+                    className="ml-2 text-red-600 hover:text-red-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

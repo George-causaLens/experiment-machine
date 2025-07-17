@@ -132,14 +132,39 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
                 {/* Business Use Case Details */}
                 <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
                   <div>
-                    <div className="text-gray-500">Target Role</div>
-                    <div className="font-medium text-gray-900">{blueprint.targetRole}</div>
+                    <div className="text-gray-500">Target Roles</div>
+                    <div className="font-medium text-gray-900">
+                      {blueprint.targetRoles && blueprint.targetRoles.length > 0 
+                        ? blueprint.targetRoles.slice(0, 2).join(', ') + (blueprint.targetRoles.length > 2 ? '...' : '')
+                        : 'Not specified'
+                      }
+                    </div>
                   </div>
                   <div>
                     <div className="text-gray-500">Company Size</div>
                     <div className="font-medium text-gray-900">{blueprint.companySize}</div>
                   </div>
                 </div>
+                
+                {/* Company Revenue */}
+                {blueprint.companyRevenue && blueprint.companyRevenue.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-xs text-gray-500 mb-1">Company Revenue</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {blueprint.companyRevenue.slice(0, 2).join(', ') + (blueprint.companyRevenue.length > 2 ? '...' : '')}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Pain Points */}
+                {blueprint.painPoints && blueprint.painPoints.length > 0 && (
+                  <div className="mb-4">
+                    <div className="text-xs text-gray-500 mb-1">Pain Points</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {blueprint.painPoints.slice(0, 2).join(', ') + (blueprint.painPoints.length > 2 ? '...' : '')}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="mb-4">
                   <div className="text-xs text-gray-500 mb-1">Automation</div>

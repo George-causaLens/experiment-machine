@@ -43,8 +43,10 @@ const transformBlueprint = (dbBlueprint: any): Blueprint => ({
   name: dbBlueprint.name,
   description: dbBlueprint.description,
   industry: dbBlueprint.industry,
-  targetRole: dbBlueprint.target_role,
+  targetRoles: dbBlueprint.target_roles || [],
   companySize: dbBlueprint.company_size,
+  companyRevenue: dbBlueprint.company_revenue || [],
+  painPoints: dbBlueprint.pain_points || [],
   automation: dbBlueprint.automation,
   valueProposition: dbBlueprint.value_proposition,
   successRate: dbBlueprint.success_rate || 0,
@@ -219,8 +221,10 @@ export class DataService {
       name: blueprint.name,
       description: blueprint.description,
       industry: blueprint.industry,
-      target_role: blueprint.targetRole,
+      target_roles: blueprint.targetRoles,
       company_size: blueprint.companySize,
+      company_revenue: blueprint.companyRevenue,
+      pain_points: blueprint.painPoints,
       automation: blueprint.automation,
       value_proposition: blueprint.valueProposition,
       success_rate: blueprint.successRate,
@@ -245,6 +249,55 @@ export class DataService {
     }
     
     return data[0] ? transformBlueprint(data[0]) : null;
+  }
+
+  static async updateBlueprint(id: string, updates: Partial<Blueprint>): Promise<Blueprint | null> {
+    const dbUpdates: any = {};
+    
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.industry !== undefined) dbUpdates.industry = updates.industry;
+    if (updates.targetRoles !== undefined) dbUpdates.target_roles = updates.targetRoles;
+    if (updates.companySize !== undefined) dbUpdates.company_size = updates.companySize;
+    if (updates.companyRevenue !== undefined) dbUpdates.company_revenue = updates.companyRevenue;
+    if (updates.painPoints !== undefined) dbUpdates.pain_points = updates.painPoints;
+    if (updates.automation !== undefined) dbUpdates.automation = updates.automation;
+    if (updates.valueProposition !== undefined) dbUpdates.value_proposition = updates.valueProposition;
+    if (updates.successRate !== undefined) dbUpdates.success_rate = updates.successRate;
+    if (updates.avgRoi !== undefined) dbUpdates.avg_roi = updates.avgRoi;
+    if (updates.avgMeetingsBooked !== undefined) dbUpdates.avg_meetings_booked = updates.avgMeetingsBooked;
+    if (updates.totalRevenue !== undefined) dbUpdates.total_revenue = updates.totalRevenue;
+    if (updates.conversionRate !== undefined) dbUpdates.conversion_rate = updates.conversionRate;
+    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+    if (updates.usageCount !== undefined) dbUpdates.usage_count = updates.usageCount;
+    if (updates.relatedExperiments !== undefined) dbUpdates.related_experiments = updates.relatedExperiments;
+
+    const { data, error } = await supabase
+      .from('blueprints')
+      .update(dbUpdates)
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating blueprint:', error);
+      return null;
+    }
+    
+    return data[0] ? transformBlueprint(data[0]) : null;
+  }
+
+  static async deleteBlueprint(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('blueprints')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting blueprint:', error);
+      return false;
+    }
+    
+    return true;
   }
 
   // ICP Profiles

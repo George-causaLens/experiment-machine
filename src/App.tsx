@@ -223,13 +223,17 @@ function App() {
   };
 
   const updateBlueprint = async (id: string, updates: Partial<Blueprint>) => {
-    // For now, we'll update locally. In a full implementation, you'd call DataService.updateBlueprint
-    setBlueprints(prev => prev.map(bp => bp.id === id ? { ...bp, ...updates } : bp));
+    const updatedBlueprint = await DataService.updateBlueprint(id, updates);
+    if (updatedBlueprint) {
+      setBlueprints(prev => prev.map(bp => bp.id === id ? updatedBlueprint : bp));
+    }
   };
 
   const deleteBlueprint = async (id: string) => {
-    // For now, we'll delete locally. In a full implementation, you'd call DataService.deleteBlueprint
-    setBlueprints(prev => prev.filter(bp => bp.id !== id));
+    const success = await DataService.deleteBlueprint(id);
+    if (success) {
+      setBlueprints(prev => prev.filter(bp => bp.id !== id));
+    }
   };
 
   const addICPProfile = async (profile: Omit<ICPProfile, 'id' | 'createdAt' | 'lastUsed'>) => {

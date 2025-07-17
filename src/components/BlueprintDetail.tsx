@@ -12,7 +12,8 @@ import {
   BuildingOfficeIcon,
   CogIcon,
   TagIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { Blueprint, Experiment } from '../types';
 
@@ -156,18 +157,56 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Target Role</label>
-                  <div className="flex items-center text-gray-900">
-                    <UserGroupIcon className="w-4 h-4 mr-2 text-gray-500" />
-                    {blueprint.targetRole}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Target Roles</label>
+                  <div className="space-y-1">
+                    {blueprint.targetRoles && blueprint.targetRoles.length > 0 ? (
+                      blueprint.targetRoles.map((role, index) => (
+                        <div key={index} className="flex items-center text-gray-900">
+                          <UserGroupIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          <span className="text-sm">{role}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-sm">No target roles specified</div>
+                    )}
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
                   <div className="text-gray-900">{blueprint.companySize}</div>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Revenue</label>
+                  <div className="space-y-1">
+                    {blueprint.companyRevenue && blueprint.companyRevenue.length > 0 ? (
+                      blueprint.companyRevenue.map((revenue, index) => (
+                        <div key={index} className="flex items-center text-gray-900">
+                          <CurrencyDollarIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          <span className="text-sm">{revenue}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-sm">No revenue ranges specified</div>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pain Points</label>
+                  <div className="space-y-1">
+                    {blueprint.painPoints && blueprint.painPoints.length > 0 ? (
+                      blueprint.painPoints.map((pain, index) => (
+                        <div key={index} className="flex items-center text-gray-900">
+                          <ExclamationTriangleIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          <span className="text-sm">{pain}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-sm">No pain points specified</div>
+                    )}
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Automation</label>
                   <div className="flex items-center text-gray-900">

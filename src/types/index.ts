@@ -112,8 +112,10 @@ export interface Blueprint {
   name: string;
   description: string;
   industry: string;
-  targetRole: string;
+  targetRoles: string[]; // Changed from targetRole to targetRoles array
   companySize: string;
+  companyRevenue: string[]; // NEW: Multiple company revenue ranges
+  painPoints: string[]; // NEW: Multiple pain points
   automation: string;
   valueProposition: string;
   successRate: number;
