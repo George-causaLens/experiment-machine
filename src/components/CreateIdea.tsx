@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { 
-  ArrowLeftIcon, 
-  LightBulbIcon,
-  PlusIcon,
-  XMarkIcon,
-  LinkIcon,
-  TrashIcon
+  PlusIcon, 
+  MagnifyingGlassIcon,
+  TrashIcon,
+  PencilIcon,
+  ArrowTopRightOnSquareIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { Idea } from '../types';
 import { DataService } from '../services/dataService';
@@ -18,6 +19,8 @@ interface CreateIdeaProps {
 const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false); // Immediate submission guard
+  const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState<Partial<Idea>>({
     name: '',
     description: '',
@@ -272,6 +275,11 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
     }));
   };
 
+  // Sync ref with state for UI updates
+  useEffect(() => {
+    setIsSubmitting(isSubmittingRef.current);
+  }, [isSubmittingRef.current]);
+
   const addUrl = () => {
     setFormData(prev => ({
       ...prev,
@@ -298,20 +306,37 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent duplicate submissions
-    if (isSubmitting) {
-      console.log('Form submission already in progress, ignoring duplicate submit');
+    console.log('=== FORM SUBMISSION START ===');
+    console.log('Event type:', e.type);
+    console.log('Is submitting:', isSubmittingRef.current);
+    console.log('Timestamp:', new Date().toISOString());
+    
+    // Prevent duplicate submissions - immediate check
+    if (isSubmittingRef.current) {
+      console.log('❌ BLOCKED: Form submission already in progress, ignoring duplicate submit');
       return;
     }
     
+    // Immediately disable the form
+    if (formRef.current) {
+      formRef.current.style.pointerEvents = 'none';
+    }
+    
+    console.log('✅ PROCEEDING: Form submission starting');
     console.log('Form submitted, formData:', formData);
     
     if (!formData.name?.trim()) {
+      console.log('❌ BLOCKED: No idea name provided');
       alert('Please enter an idea name');
+      // Re-enable form on validation error
+      if (formRef.current) {
+        formRef.current.style.pointerEvents = 'auto';
+      }
       return;
     }
 
-    setIsSubmitting(true);
+    console.log('🔄 Setting isSubmitting to true');
+    isSubmittingRef.current = true;
 
     try {
       // Filter out empty URLs
@@ -336,25 +361,31 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
         tags: formData.tags || []
       };
 
-      console.log('Calling DataService.createIdea with:', ideaData);
+      console.log('📤 Calling DataService.createIdea with:', ideaData);
       
       const newIdea = await DataService.createIdea(ideaData);
-      console.log('DataService.createIdea result:', newIdea);
+      console.log('📥 DataService.createIdea result:', newIdea);
       
       if (newIdea) {
-        console.log('Idea created successfully, calling onAddIdea');
+        console.log('✅ Idea created successfully, calling onAddIdea');
         onAddIdea(newIdea);
-        console.log('Navigating to /ideas');
+        console.log('🔄 Navigating to /ideas');
         navigate('/ideas');
       } else {
-        console.log('Failed to create idea');
+        console.log('❌ Failed to create idea');
         alert('Failed to save idea. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating idea:', error);
+      console.error('❌ Error creating idea:', error);
       alert('Failed to save idea. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      console.log('🔄 Setting isSubmitting to false');
+      isSubmittingRef.current = false;
+      // Re-enable the form
+      if (formRef.current) {
+        formRef.current.style.pointerEvents = 'auto';
+      }
+      console.log('=== FORM SUBMISSION END ===');
     }
   };
 
@@ -388,7 +419,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>

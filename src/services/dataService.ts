@@ -393,10 +393,11 @@ export class DataService {
 
   static async createIdea(idea: Omit<Idea, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Idea | null> {
     try {
-      console.log('DataService.createIdea called with:', idea);
+      console.log('🔍 DataService.createIdea called with:', idea);
+      console.log('🔍 Timestamp:', new Date().toISOString());
       
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('Current user:', user);
+      console.log('🔍 Current user:', user);
       
       if (!user) throw new Error('User not authenticated');
 
@@ -419,22 +420,34 @@ export class DataService {
         impact: idea.impact,
         tags: idea.tags
       };
-      
-      console.log('Inserting data:', insertData);
 
+      console.log('🔍 Inserting data:', insertData);
+      
       const { data, error } = await supabase
         .from('ideas')
         .insert(insertData)
         .select()
         .single();
 
-      console.log('Supabase response - data:', data, 'error:', error);
+      console.log('🔍 Supabase response - data:', data);
+      console.log('🔍 Supabase response - error:', error);
 
-      if (error) throw error;
-      return transformIdea(data);
-    } catch (error) {
-      console.error('Error creating idea:', error);
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+
+      if (data) {
+        const transformedIdea = transformIdea(data);
+        console.log('✅ Successfully created idea:', transformedIdea);
+        return transformedIdea;
+      }
+
+      console.log('❌ No data returned from Supabase');
       return null;
+    } catch (error) {
+      console.error('❌ Error in DataService.createIdea:', error);
+      throw error;
     }
   }
 
