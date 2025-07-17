@@ -192,11 +192,86 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
   ];
 
   const predefinedPainPoints = [
-    'Lead generation', 'Customer acquisition cost', 'Sales cycle length', 'Conversion rates',
-    'Customer retention', 'Revenue growth', 'Operational efficiency', 'Data management',
-    'Process automation', 'Team productivity', 'Cost reduction', 'Market expansion',
-    'Competitive pressure', 'Technology integration', 'Compliance requirements',
-    'Scaling challenges', 'Customer satisfaction', 'Employee retention'
+    // General Pain Points (Operational + Analytical)
+    { group: 'General Pain Points (Operational + Analytical)', type: 'header' },
+    'Operational efficiency',
+    'Process automation',
+    'Manual reporting',
+    'Forecasting inaccuracy',
+    'Delayed insights',
+    'Siloed data',
+    'Decision latency',
+    'High labor costs',
+    'Workflow bottlenecks',
+    'Repetitive tasks',
+    'Tool sprawl',
+    'Poor data quality',
+    'Slow time-to-value',
+    'Legacy systems',
+    'Resource constraints',
+    'Insight inactionability',
+    'Compliance risk',
+    'Scaling limitations',
+    'Human error',
+    'Audit complexity',
+    'Change resistance',
+    'Demand unpredictability',
+    'Data overload',
+    'Underused analytics',
+    'Inefficient handoffs',
+    'Analyst dependency',
+    { group: 'Retail / CPG Pain Points', type: 'header' },
+    'Demand volatility',
+    'Inventory imbalances',
+    'Trade inefficiency',
+    'Merchandising delays',
+    'Pricing complexity',
+    'Promotion performance',
+    'Supply disruptions',
+    'Channel misalignment',
+    'Sales forecasting gaps',
+    'Planogram inefficiency',
+    'SKU proliferation',
+    'Store execution gaps',
+    { group: 'Pharmaceuticals Pain Points', type: 'header' },
+    'Trial enrollment delays',
+    'Field force inefficiency',
+    'Commercial waste',
+    'Market access complexity',
+    'Regulatory overhead',
+    'R&D cycle time',
+    'Site activation delays',
+    'HCP targeting issues',
+    'Data integration issues',
+    'Launch forecasting gaps',
+    'Medical affairs backlog',
+    'Compliance documentation',
+    { group: 'Financial Services Pain Points', type: 'header' },
+    'Risk exposure',
+    'Manual underwriting',
+    'Claims backlog',
+    'Fraud detection delays',
+    'Credit scoring gaps',
+    'KYC inefficiency',
+    'Regulatory reporting',
+    'Policy churn analysis',
+    'Customer attrition risk',
+    'Branch performance gaps',
+    'Audit trail gaps',
+    'Pricing inconsistency',
+    { group: 'Manufacturing / Industrials Pain Points', type: 'header' },
+    'Downtime prediction',
+    'Root cause delay',
+    'Quality variation',
+    'Maintenance inefficiency',
+    'Throughput stagnation',
+    'Supply planning errors',
+    'Parts inventory bloat',
+    'Procurement delays',
+    'Schedule variability',
+    'Energy inefficiency',
+    'Waste identification',
+    'Equipment failure'
   ];
 
   const outreachStrategies = [
@@ -995,9 +1070,14 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                           >
                             <option value="">Select pain point</option>
-                            {predefinedPainPoints.map(pain => (
-                              <option key={pain} value={pain}>{pain}</option>
-                            ))}
+                            {predefinedPainPoints.map(pain => {
+                              if (typeof pain === 'string') {
+                                return <option key={pain} value={pain}>{pain}</option>;
+                              } else if (pain.type === 'header') {
+                                return <optgroup key={pain.group} label={pain.group} className="font-bold text-gray-900 bg-gray-100"></optgroup>;
+                              }
+                              return null;
+                            })}
                           </select>
                           <button
                             type="button"
