@@ -275,21 +275,21 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const addUrl = () => {
     setFormData(prev => ({
       ...prev,
-      urls: [...prev.urls, { title: '', url: '' }]
+      urls: [...(prev.urls || []), { title: '', url: '' }]
     }));
   };
 
   const removeUrl = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      urls: prev.urls.filter((_, i) => i !== index)
+      urls: (prev.urls || []).filter((_, i) => i !== index)
     }));
   };
 
   const updateUrl = (index: number, field: 'title' | 'url', value: string) => {
     setFormData(prev => ({
       ...prev,
-      urls: prev.urls.map((url, i) => 
+      urls: (prev.urls || []).map((url, i) => 
         i === index ? { ...url, [field]: value } : url
       )
     }));
@@ -306,7 +306,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
     
     console.log('Form submitted, formData:', formData);
     
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       alert('Please enter an idea name');
       return;
     }
@@ -315,25 +315,25 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
 
     try {
       // Filter out empty URLs
-      const filteredUrls = formData.urls.filter(url => url.url.trim());
+      const filteredUrls = (formData.urls || []).filter(url => url.url.trim());
 
       const ideaData = {
         name: formData.name.trim(),
-        description: formData.description.trim(),
+        description: formData.description?.trim() || '',
         urls: filteredUrls,
-        targetRoles: formData.targetRoles,
-        industries: formData.industries,
-        companySizes: formData.companySizes,
-        companyRevenue: formData.companyRevenue,
-        painPoints: formData.painPoints,
-        distributionChannels: formData.distributionChannels,
-        outreachStrategies: formData.outreachStrategies,
-        contentTypes: formData.contentTypes,
-        messagingFocus: formData.messagingFocus,
-        priority: formData.priority,
-        effort: formData.effort,
-        impact: formData.impact,
-        tags: formData.tags
+        targetRoles: formData.targetRoles || [],
+        industries: formData.industries || [],
+        companySizes: formData.companySizes || [],
+        companyRevenue: formData.companyRevenue || [],
+        painPoints: formData.painPoints || [],
+        distributionChannels: formData.distributionChannels || [],
+        outreachStrategies: formData.outreachStrategies || [],
+        contentTypes: formData.contentTypes || [],
+        messagingFocus: formData.messagingFocus || [],
+        priority: formData.priority || 'medium',
+        effort: formData.effort || 'medium',
+        impact: formData.impact || 'medium',
+        tags: formData.tags || []
       };
 
       console.log('Calling DataService.createIdea with:', ideaData);
@@ -342,16 +342,16 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       console.log('DataService.createIdea result:', newIdea);
       
       if (newIdea) {
-        console.log('Calling onAddIdea with:', newIdea);
+        console.log('Idea created successfully, calling onAddIdea');
         onAddIdea(newIdea);
         console.log('Navigating to /ideas');
         navigate('/ideas');
       } else {
-        console.error('Failed to create idea - DataService.createIdea returned null');
+        console.log('Failed to create idea');
         alert('Failed to save idea. Please try again.');
       }
     } catch (error) {
-      console.error('Error during idea creation:', error);
+      console.error('Error creating idea:', error);
       alert('Failed to save idea. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -428,7 +428,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
             Inspiration Links
           </h2>
           <div className="space-y-4">
-            {formData.urls.map((url, index) => (
+            {(formData.urls || []).map((url, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <input
                   type="text"
@@ -538,7 +538,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.targetRoles.map((role, index) => (
+              {(formData.targetRoles || []).map((role, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800"
@@ -581,7 +581,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.industries.map((industry, index) => (
+              {(formData.industries || []).map((industry, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -625,7 +625,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {formData.companySizes.map((size, index) => (
+                {(formData.companySizes || []).map((size, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
@@ -667,7 +667,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {formData.companyRevenue.map((revenue, index) => (
+                {(formData.companyRevenue || []).map((revenue, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
@@ -718,7 +718,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.painPoints.map((pain, index) => (
+              {(formData.painPoints || []).map((pain, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
@@ -761,7 +761,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.distributionChannels.map((channel, index) => (
+              {(formData.distributionChannels || []).map((channel, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
@@ -804,7 +804,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.outreachStrategies.map((strategy, index) => (
+              {(formData.outreachStrategies || []).map((strategy, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
@@ -847,7 +847,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.contentTypes.map((type, index) => (
+              {(formData.contentTypes || []).map((type, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800"
@@ -890,7 +890,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.messagingFocus.map((focus, index) => (
+              {(formData.messagingFocus || []).map((focus, index) => (
                 <span
                   key={index}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800"
