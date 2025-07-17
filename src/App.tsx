@@ -75,7 +75,7 @@ function App() {
     handlePasswordResetRedirect();
   }, []);
 
-  // Get session on component mount
+  // Initialize auth state and set up listener
   useEffect(() => {
     const getSession = async () => {
       try {
@@ -92,16 +92,90 @@ function App() {
 
     getSession();
 
+    // Set up auth state change listener with debouncing
+    let authCheckTimeout: NodeJS.Timeout;
+    let lastAuthEvent = '';
+    let sessionRefreshInterval: NodeJS.Timeout;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Prevent duplicate auth events
+        if (event === lastAuthEvent && session?.user?.id === user?.id) {
+          console.log('Skipping duplicate auth event:', event);
+          return;
+        }
+        
         console.log('Auth state changed:', event, session?.user?.email);
-        setUser(session?.user ?? null);
-        setAuthLoading(false);
+        lastAuthEvent = event;
+        
+        // Clear any pending auth check
+        if (authCheckTimeout) {
+          clearTimeout(authCheckTimeout);
+        }
+        
+        // Debounce auth state changes to prevent rapid firing
+        authCheckTimeout = setTimeout(() => {
+          setUser(session?.user ?? null);
+          setAuthLoading(false);
+        }, 100);
+
+        // Set up session refresh only if user is authenticated
+        if (session?.user) {
+          // Clear any existing refresh interval
+          if (sessionRefreshInterval) {
+            clearInterval(sessionRefreshInterval);
+          }
+          
+          // Set up session refresh every 30 minutes (Supabase sessions last 1 hour)
+          sessionRefreshInterval = setInterval(async () => {
+            try {
+              const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+              if (refreshedSession?.user) {
+                console.log('Session refreshed automatically');
+                setUser(refreshedSession.user);
+              }
+            } catch (error) {
+              console.error('Error refreshing session:', error);
+            }
+          }, 30 * 60 * 1000); // 30 minutes
+        } else {
+          // Clear refresh interval if no user
+          if (sessionRefreshInterval) {
+            clearInterval(sessionRefreshInterval);
+          }
+        }
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Handle visibility change to prevent unnecessary checks on tab switch
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Only refresh session if it's been more than 5 minutes since last check
+        const lastCheck = sessionStorage.getItem('lastSessionCheck');
+        const now = Date.now();
+        if (!lastCheck || (now - parseInt(lastCheck)) > 5 * 60 * 1000) {
+          console.log('Tab became visible, checking session...');
+          sessionStorage.setItem('lastSessionCheck', now.toString());
+          getSession();
+        } else {
+          console.log('Tab became visible, but session was recently checked, skipping');
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      if (authCheckTimeout) {
+        clearTimeout(authCheckTimeout);
+      }
+      if (sessionRefreshInterval) {
+        clearInterval(sessionRefreshInterval);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   // Check user approval status when user changes
   useEffect(() => {
@@ -111,21 +185,45 @@ function App() {
       return;
     }
 
+    // Prevent multiple simultaneous user status checks
+    let isMounted = true;
+    let checkInProgress = false;
+
     const checkUserStatus = async () => {
+      if (checkInProgress) {
+        console.log('User status check already in progress, skipping');
+        return;
+      }
+
       try {
+        console.log('Checking user status for:', user.email);
+        checkInProgress = true;
         setUserStatusLoading(true);
         const currentUser = await UserManagementService.getCurrentUser();
-        setAppUser(currentUser);
+        
+        if (isMounted) {
+          setAppUser(currentUser);
+        }
       } catch (error) {
         console.error('Error checking user status:', error);
-        setAppUser(null);
+        if (isMounted) {
+          setAppUser(null);
+        }
       } finally {
-        setUserStatusLoading(false);
+        if (isMounted) {
+          setUserStatusLoading(false);
+        }
+        checkInProgress = false;
       }
     };
 
     checkUserStatus();
-  }, [user]);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]); // Only check when user ID changes, not the entire user object
 
   // Load data when user is authenticated and approved
   useEffect(() => {
@@ -265,11 +363,9 @@ function App() {
     setICPProfiles(prev => prev.filter(profile => profile.id !== id));
   };
 
-  const addIdea = async (idea: Omit<Idea, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
-    const newIdea = await DataService.createIdea(idea);
-    if (newIdea) {
-      setIdeas(prev => [newIdea, ...prev]);
-    }
+  const addIdea = async (idea: Idea) => {
+    // The idea has already been created by the component, just add it to state
+    setIdeas(prev => [idea, ...prev]);
   };
 
   const updateIdea = async (id: string, updates: Partial<Idea>) => {
