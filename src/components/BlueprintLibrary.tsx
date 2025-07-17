@@ -119,7 +119,10 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                    {blueprint.industry}
+                    {blueprint.industry && blueprint.industry.length > 0 
+                      ? blueprint.industry.slice(0, 2).join(', ') + (blueprint.industry.length > 2 ? '...' : '')
+                      : 'Not specified'
+                    }
                   </span>
                   <div className="flex items-center text-yellow-500">
                     <StarIcon className="w-4 h-4 fill-current" />
@@ -142,7 +145,12 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
                   </div>
                   <div>
                     <div className="text-gray-500">Company Size</div>
-                    <div className="font-medium text-gray-900">{blueprint.companySize}</div>
+                    <div className="font-medium text-gray-900">
+                      {blueprint.companySize && blueprint.companySize.length > 0 
+                        ? blueprint.companySize.slice(0, 2).join(', ') + (blueprint.companySize.length > 2 ? '...' : '')
+                        : 'Not specified'
+                      }
+                    </div>
                   </div>
                 </div>
                 

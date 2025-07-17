@@ -13,7 +13,8 @@ import {
   CogIcon,
   TagIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { Blueprint, Experiment } from '../types';
 
@@ -151,9 +152,17 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
-                  <div className="flex items-center text-gray-900">
-                    <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-500" />
-                    {blueprint.industry}
+                  <div className="space-y-1">
+                    {blueprint.industry && blueprint.industry.length > 0 ? (
+                      blueprint.industry.map((industry, index) => (
+                        <div key={index} className="flex items-center text-gray-900">
+                          <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          <span className="text-sm">{industry}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-sm">No industries specified</div>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -173,7 +182,18 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
-                  <div className="text-gray-900">{blueprint.companySize}</div>
+                  <div className="space-y-1">
+                    {blueprint.companySize && blueprint.companySize.length > 0 ? (
+                      blueprint.companySize.map((size, index) => (
+                        <div key={index} className="flex items-center text-gray-900">
+                          <UsersIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          <span className="text-sm">{size}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-gray-500 text-sm">No company sizes specified</div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Revenue</label>

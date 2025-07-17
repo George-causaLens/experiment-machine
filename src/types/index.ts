@@ -111,9 +111,9 @@ export interface Blueprint {
   id: string;
   name: string;
   description: string;
-  industry: string;
+  industry: string[]; // Changed from string to string[] for multi-selection
   targetRoles: string[]; // Changed from targetRole to targetRoles array
-  companySize: string;
+  companySize: string[]; // Changed from string to string[] for multi-selection
   companyRevenue: string[]; // NEW: Multiple company revenue ranges
   painPoints: string[]; // NEW: Multiple pain points
   automation: string;

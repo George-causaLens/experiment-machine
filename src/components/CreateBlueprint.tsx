@@ -7,7 +7,8 @@ import {
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
   PlusIcon,
-  XMarkIcon
+  XMarkIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { Blueprint } from '../types';
 
@@ -21,9 +22,9 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    industry: '',
+    industry: [] as string[],
     targetRoles: [] as string[],
-    companySize: '',
+    companySize: [] as string[],
     companyRevenue: [] as string[],
     painPoints: [] as string[],
     automation: '',
@@ -31,6 +32,8 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
   });
 
   const [newTargetRole, setNewTargetRole] = useState('');
+  const [newIndustry, setNewIndustry] = useState('');
+  const [newCompanySize, setNewCompanySize] = useState('');
   const [newCompanyRevenue, setNewCompanyRevenue] = useState('');
   const [newPainPoint, setNewPainPoint] = useState('');
 
@@ -204,7 +207,7 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
     'Equipment failure'
   ];
 
-  const addItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', value: string, setter: (value: string) => void) => {
+  const addItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints' | 'industry' | 'companySize', value: string, setter: (value: string) => void) => {
     if (value.trim() && !formData[field].includes(value.trim())) {
       setFormData(prev => ({
         ...prev,
@@ -214,7 +217,7 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
     }
   };
 
-  const removeItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', itemToRemove: string) => {
+  const removeItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints' | 'industry' | 'companySize', itemToRemove: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].filter(item => item !== itemToRemove)
@@ -292,8 +295,8 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
               </label>
               <select
                 required
-                value={formData.industry}
-                onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
+                value={newIndustry}
+                onChange={(e) => setNewIndustry(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">Select Industry</option>
@@ -307,6 +310,13 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
                 <option value="Consulting">Consulting</option>
                 <option value="Other">Other</option>
               </select>
+              <button
+                type="button"
+                onClick={() => addItem('industry', newIndustry, setNewIndustry)}
+                className="btn-secondary mt-2"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -314,8 +324,8 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
               </label>
               <select
                 required
-                value={formData.companySize}
-                onChange={(e) => setFormData(prev => ({ ...prev, companySize: e.target.value }))}
+                value={newCompanySize}
+                onChange={(e) => setNewCompanySize(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">Select Company Size</option>
@@ -328,6 +338,13 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
                 <option value="5001-10000 employees">5001-10000 employees</option>
                 <option value="10000+ employees">10000+ employees</option>
               </select>
+              <button
+                type="button"
+                onClick={() => addItem('companySize', newCompanySize, setNewCompanySize)}
+                className="btn-secondary mt-2"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
             </div>
           </div>
           <div className="mt-6">
@@ -344,6 +361,60 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
             />
           </div>
         </div>
+
+        {/* Selected Industries */}
+        {formData.industry.length > 0 && (
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <BuildingOfficeIcon className="w-5 h-5 mr-2 text-primary-600" />
+              Selected Industries
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {formData.industry.map((industry, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                >
+                  {industry}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('industry', industry)}
+                    className="ml-2 text-blue-600 hover:text-blue-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Selected Company Sizes */}
+        {formData.companySize.length > 0 && (
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <UsersIcon className="w-5 h-5 mr-2 text-primary-600" />
+              Selected Company Sizes
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {formData.companySize.map((size, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                >
+                  {size}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('companySize', size)}
+                    className="ml-2 text-green-600 hover:text-green-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Target Roles */}
         <div className="card">

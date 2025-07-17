@@ -8,8 +8,8 @@ export const seedSampleData = async () => {
     const blueprint1 = await DataService.createBlueprint({
       name: 'Manufacturing COO Document Automation',
       description: 'Automate PDF categorization and document processing for Manufacturing COOs at large companies',
-      industry: 'Manufacturing',
-      companySize: '$100M+ revenue',
+      industry: ['Manufacturing'],
+      companySize: ['1001-5000 employees', '5001-10000 employees', '10000+ employees'],
       automation: 'PDF → Categorization automation',
       valueProposition: '$50M annual value through streamlined document processing',
       successRate: 85,
@@ -28,8 +28,8 @@ export const seedSampleData = async () => {
     const blueprint2 = await DataService.createBlueprint({
       name: 'Financial Services CTO Fraud Detection',
       description: 'Automate transaction monitoring and fraud detection for Financial Services CTOs',
-      industry: 'Financial Services',
-      companySize: '$500M+ revenue',
+      industry: ['Financial Services'],
+      companySize: ['1001-5000 employees', '5001-10000 employees', '10000+ employees'],
       automation: 'Transaction → Fraud Detection',
       valueProposition: '$25M annual savings through automated fraud prevention',
       successRate: 78,

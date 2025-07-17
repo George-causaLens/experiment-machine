@@ -7,7 +7,8 @@ import {
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
   PlusIcon,
-  XMarkIcon
+  XMarkIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { Blueprint } from '../types';
 
@@ -28,9 +29,9 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
   const [formData, setFormData] = useState<Partial<Blueprint>>({
     name: '',
     description: '',
-    industry: '',
+    industry: [],
     targetRoles: [],
-    companySize: '',
+    companySize: [],
     companyRevenue: [],
     painPoints: [],
     automation: '',
@@ -45,6 +46,8 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
   });
 
   const [newTargetRole, setNewTargetRole] = useState('');
+  const [newIndustry, setNewIndustry] = useState('');
+  const [newCompanySize, setNewCompanySize] = useState('');
   const [newCompanyRevenue, setNewCompanyRevenue] = useState('');
   const [newPainPoint, setNewPainPoint] = useState('');
   const [tagInput, setTagInput] = useState('');
@@ -248,20 +251,20 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
     }));
   };
 
-  const addItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', value: string, setter: (value: string) => void) => {
-    if (value.trim() && !(formData[field] || []).includes(value.trim())) {
+  const addItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints' | 'industry' | 'companySize', value: string, setter: (value: string) => void) => {
+    if (value.trim() && !(formData[field] as string[])?.includes(value.trim())) {
       setFormData(prev => ({
         ...prev,
-        [field]: [...(prev[field] || []), value.trim()]
+        [field]: [...(prev[field] as string[] || []), value.trim()]
       }));
       setter('');
     }
   };
 
-  const removeItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints', itemToRemove: string) => {
+  const removeItem = (field: 'targetRoles' | 'companyRevenue' | 'painPoints' | 'industry' | 'companySize', itemToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: (prev[field] || []).filter(item => item !== itemToRemove)
+      [field]: (prev[field] as string[] || []).filter(item => item !== itemToRemove)
     }));
   };
 
@@ -331,8 +334,8 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
                 Industry *
               </label>
               <select
-                value={formData.industry || ''}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
+                value={newIndustry}
+                onChange={(e) => setNewIndustry(e.target.value)}
                 className="form-select w-full"
                 required
               >
@@ -347,14 +350,21 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
                 <option value="Consulting">Consulting</option>
                 <option value="Other">Other</option>
               </select>
+              <button
+                type="button"
+                onClick={() => addItem('industry', newIndustry, setNewIndustry)}
+                className="btn-secondary mt-2"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Company Size *
               </label>
               <select
-                value={formData.companySize || ''}
-                onChange={(e) => handleInputChange('companySize', e.target.value)}
+                value={newCompanySize}
+                onChange={(e) => setNewCompanySize(e.target.value)}
                 className="form-select w-full"
                 required
               >
@@ -368,6 +378,13 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
                 <option value="5001-10000 employees">5001-10000 employees</option>
                 <option value="10000+ employees">10000+ employees</option>
               </select>
+              <button
+                type="button"
+                onClick={() => addItem('companySize', newCompanySize, setNewCompanySize)}
+                className="btn-secondary mt-2"
+              >
+                <PlusIcon className="w-4 h-4" />
+              </button>
             </div>
           </div>
           <div className="mt-6">
@@ -384,6 +401,60 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
             />
           </div>
         </div>
+
+        {/* Selected Industries */}
+        {formData.industry && formData.industry.length > 0 && (
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <BuildingOfficeIcon className="w-5 h-5 mr-2 text-primary-600" />
+              Selected Industries
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {formData.industry.map((industry, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                >
+                  {industry}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('industry', industry)}
+                    className="ml-2 text-blue-600 hover:text-blue-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Selected Company Sizes */}
+        {formData.companySize && formData.companySize.length > 0 && (
+          <div className="card">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <UsersIcon className="w-5 h-5 mr-2 text-primary-600" />
+              Selected Company Sizes
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {formData.companySize.map((size, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                >
+                  {size}
+                  <button
+                    type="button"
+                    onClick={() => removeItem('companySize', size)}
+                    className="ml-2 text-green-600 hover:text-green-800"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Target Roles */}
         <div className="card">
