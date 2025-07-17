@@ -32,14 +32,17 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const categories = ['all', ...Array.from(new Set(blueprints.map(bp => bp.industry)))];
+  // Get unique categories from all blueprint industries
+  const allIndustries = blueprints.flatMap(bp => bp.industry || []);
+  const categories = ['all', ...Array.from(new Set(allIndustries))];
 
   const filteredBlueprints = blueprints.filter(blueprint => {
     const matchesSearch = !searchTerm || 
       blueprint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blueprint.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === 'all' || blueprint.industry === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || 
+      (blueprint.industry && blueprint.industry.includes(selectedCategory));
     
     return matchesSearch && matchesCategory;
   });
