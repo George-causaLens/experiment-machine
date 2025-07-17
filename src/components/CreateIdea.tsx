@@ -17,24 +17,24 @@ interface CreateIdeaProps {
 
 const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<Partial<Idea>>({
     name: '',
     description: '',
-    urls: [{ title: '', url: '' }] as Array<{ title: string; url: string }>,
-    targetRoles: [] as string[],
-    industries: [] as string[],
-    companySizes: [] as string[],
-    companyRevenue: [] as string[],
-    painPoints: [] as string[],
-    distributionChannels: [] as string[],
-    outreachStrategies: [] as string[],
-    contentTypes: [] as string[],
-    messagingFocus: [] as string[],
-    priority: 'medium' as 'high' | 'medium' | 'low',
-    effort: 'medium' as 'high' | 'medium' | 'low',
-    impact: 'medium' as 'high' | 'medium' | 'low',
-    tags: [] as string[]
+    urls: [{ title: '', url: '' }],
+    targetRoles: [],
+    industries: [],
+    companySizes: [],
+    companyRevenue: [],
+    painPoints: [],
+    distributionChannels: [],
+    outreachStrategies: [],
+    contentTypes: [],
+    messagingFocus: [],
+    priority: 'medium',
+    effort: 'medium',
+    impact: 'medium',
+    tags: []
   });
 
   const [newTargetRole, setNewTargetRole] = useState('');
@@ -298,6 +298,12 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+      console.log('Form submission already in progress, ignoring duplicate submit');
+      return;
+    }
+    
     console.log('Form submitted, formData:', formData);
     
     if (!formData.name.trim()) {
@@ -305,41 +311,50 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       return;
     }
 
-    // Filter out empty URLs
-    const filteredUrls = formData.urls.filter(url => url.url.trim());
+    setIsSubmitting(true);
 
-    const ideaData = {
-      name: formData.name.trim(),
-      description: formData.description.trim(),
-      urls: filteredUrls,
-      targetRoles: formData.targetRoles,
-      industries: formData.industries,
-      companySizes: formData.companySizes,
-      companyRevenue: formData.companyRevenue,
-      painPoints: formData.painPoints,
-      distributionChannels: formData.distributionChannels,
-      outreachStrategies: formData.outreachStrategies,
-      contentTypes: formData.contentTypes,
-      messagingFocus: formData.messagingFocus,
-      priority: formData.priority,
-      effort: formData.effort,
-      impact: formData.impact,
-      tags: formData.tags
-    };
+    try {
+      // Filter out empty URLs
+      const filteredUrls = formData.urls.filter(url => url.url.trim());
 
-    console.log('Calling DataService.createIdea with:', ideaData);
-    
-    const newIdea = await DataService.createIdea(ideaData);
-    console.log('DataService.createIdea result:', newIdea);
-    
-    if (newIdea) {
-      console.log('Calling onAddIdea with:', newIdea);
-      onAddIdea(newIdea);
-      console.log('Navigating to /ideas');
-      navigate('/ideas');
-    } else {
-      console.error('Failed to create idea - DataService.createIdea returned null');
+      const ideaData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        urls: filteredUrls,
+        targetRoles: formData.targetRoles,
+        industries: formData.industries,
+        companySizes: formData.companySizes,
+        companyRevenue: formData.companyRevenue,
+        painPoints: formData.painPoints,
+        distributionChannels: formData.distributionChannels,
+        outreachStrategies: formData.outreachStrategies,
+        contentTypes: formData.contentTypes,
+        messagingFocus: formData.messagingFocus,
+        priority: formData.priority,
+        effort: formData.effort,
+        impact: formData.impact,
+        tags: formData.tags
+      };
+
+      console.log('Calling DataService.createIdea with:', ideaData);
+      
+      const newIdea = await DataService.createIdea(ideaData);
+      console.log('DataService.createIdea result:', newIdea);
+      
+      if (newIdea) {
+        console.log('Calling onAddIdea with:', newIdea);
+        onAddIdea(newIdea);
+        console.log('Navigating to /ideas');
+        navigate('/ideas');
+      } else {
+        console.error('Failed to create idea - DataService.createIdea returned null');
+        alert('Failed to save idea. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during idea creation:', error);
       alert('Failed to save idea. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -900,6 +915,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
             type="button"
             onClick={() => navigate('/ideas')}
             className="btn-secondary"
+            disabled={isSubmitting}
           >
             Cancel
           </button>
@@ -907,14 +923,16 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
             type="button"
             onClick={handleCreateExperiment}
             className="btn-primary"
+            disabled={isSubmitting}
           >
             Create Experiment
           </button>
           <button
             type="submit"
             className="btn-primary"
+            disabled={isSubmitting}
           >
-            Save Idea
+            {isSubmitting ? 'Saving...' : 'Save Idea'}
           </button>
         </div>
       </form>
