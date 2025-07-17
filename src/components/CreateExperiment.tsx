@@ -77,11 +77,84 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
 
   // Predefined options for custom targeting (same as CreateICPProfile)
   const predefinedJobTitles = [
-    'CEO', 'CTO', 'CFO', 'COO', 'VP Engineering', 'VP Sales', 'VP Marketing', 'VP Operations',
-    'Director of Engineering', 'Director of Sales', 'Director of Marketing', 'Director of Operations',
-    'Head of Product', 'Head of Technology', 'Head of Growth', 'Head of Revenue',
-    'Engineering Manager', 'Sales Manager', 'Marketing Manager', 'Product Manager',
-    'Senior Developer', 'Senior Sales Executive', 'Senior Marketing Specialist'
+    // CROSS-INDUSTRY (Operational + Analytical Titles)
+    { group: 'CROSS-INDUSTRY (Operational + Analytical Titles)', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Operating Officer (COO)',
+    'Chief Transformation Officer (CTO)',
+    'Chief Supply Chain Officer (CSCO)',
+    'Chief Commercial Officer (CCO)',
+    'Chief Financial Officer (CFO)',
+    'Chief Analytics Officer (CAO)',
+    'Chief Data Officer (CDO)',
+    'Chief Technology Officer (CTO)',
+    'Chief Information Officer (CIO)',
+    { group: 'C-1 to C-3 (Operational Leadership)', type: 'subheader' },
+    'VP / SVP / Director of Operations',
+    'VP / Director of Supply Chain',
+    'VP / Director of Process Excellence / Operational Excellence',
+    'VP / Director of Commercial Operations',
+    'VP / Director of Shared Services / Business Services',
+    'VP / Director of Global Business Services (GBS)',
+    'VP / Director of Digital Transformation',
+    'VP / Director of Procurement Operations',
+    'Head of Business Process Automation / Intelligent Automation',
+    { group: 'C-1 to C-3 (Analytical Leadership)', type: 'subheader' },
+    'VP / Director of Analytics & Insights',
+    'VP / Director of Data Science',
+    'VP / Director of Reporting & BI',
+    'VP / Director of Forecasting / Planning & Analysis',
+    'Head of Advanced Analytics',
+    'Head of Data Platforms / Engineering',
+    { group: 'RETAIL / CPG', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Merchandising Officer',
+    'Chief Supply Chain Officer',
+    'Chief Marketing Officer (for campaign analytics ops)',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Demand Planning',
+    'VP / Director of Inventory & Logistics',
+    'Director of Retail Operations',
+    'Director of Marketing Analytics',
+    'Head of Category Insights',
+    'Director of Trade Promotion Effectiveness',
+    'Head of Sales & Channel Performance',
+    { group: 'PHARMACEUTICALS', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Commercial Officer',
+    'Chief Medical Officer (for clinical ops)',
+    'Chief Scientific Officer',
+    'Chief Operating Officer (often covers both R&D and Commercial Ops)',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Clinical Operations',
+    'VP / Director of R&D Operations',
+    'VP / Director of Commercial Excellence',
+    'VP / Director of Medical Affairs Operations',
+    'Director of Field Force Effectiveness',
+    { group: 'FINANCIAL SERVICES', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Risk Officer (CRO)',
+    'Chief Underwriting Officer (Insurance)',
+    'Chief Operating Officer',
+    'Chief Analytics Officer',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Risk & Compliance Operations',
+    'VP / Director of Credit Analytics',
+    'Director of Fraud & Financial Crime Analytics',
+    'VP / Director of Claims Operations (Insurance)',
+    'Director of Customer Intelligence',
+    'Head of Financial Planning & Analysis (FP&A)',
+    'Head of Regulatory Reporting Automation',
+    { group: 'MANUFACTURING / INDUSTRIALS', type: 'header' },
+    { group: 'C-suite', type: 'subheader' },
+    'Chief Supply Chain Officer',
+    'Chief Operations Officer',
+    'Chief Manufacturing Officer',
+    'Chief Digital Officer / CIO',
+    { group: 'C-1 to C-3', type: 'subheader' },
+    'VP / Director of Supply Chain Analytics',
+    'VP / Director of Manufacturing Excellence',
+    'Director of Quality Analytics'
   ];
 
   const predefinedIndustries = [
@@ -641,9 +714,16 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                           >
                             <option value="">Select from predefined options</option>
-                            {predefinedJobTitles.map(title => (
-                              <option key={title} value={title}>{title}</option>
-                            ))}
+                            {predefinedJobTitles.map((item, index) => {
+                              if (typeof item === 'string') {
+                                return <option key={index} value={item}>{item}</option>;
+                              } else if (item.type === 'header') {
+                                return <optgroup key={index} label={item.group} className="font-bold text-gray-900 bg-gray-100"></optgroup>;
+                              } else if (item.type === 'subheader') {
+                                return <optgroup key={index} label={item.group} className="font-semibold text-gray-700 bg-gray-50"></optgroup>;
+                              }
+                              return null;
+                            })}
                           </select>
                           <button
                             type="button"
