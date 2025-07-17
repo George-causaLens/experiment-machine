@@ -25,6 +25,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false); // Immediate submission guard
   const formRef = useRef<HTMLFormElement>(null);
+  const submissionIdRef = useRef<string | null>(null); // Unique submission ID
   const [formData, setFormData] = useState<Partial<Idea>>({
     name: '',
     description: '',
@@ -282,7 +283,16 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   // Sync ref with state for UI updates
   useEffect(() => {
     setIsSubmitting(isSubmittingRef.current);
-  });
+  }, []); // Empty dependency array to run only once
+
+  // Cleanup effect to clear submission ID on unmount
+  useEffect(() => {
+    return () => {
+      // Clear submission ID when component unmounts
+      submissionIdRef.current = null;
+      isSubmittingRef.current = false;
+    };
+  }, []);
 
   const addUrl = () => {
     setFormData(prev => ({
@@ -310,9 +320,14 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Generate unique submission ID
+    const currentSubmissionId = `submission-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
     console.log('=== FORM SUBMISSION START ===');
+    console.log('Submission ID:', currentSubmissionId);
     console.log('Event type:', e.type);
     console.log('Is submitting:', isSubmittingRef.current);
+    console.log('Previous submission ID:', submissionIdRef.current);
     console.log('Timestamp:', new Date().toISOString());
     
     // Prevent duplicate submissions - immediate check
@@ -320,6 +335,15 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       console.log('❌ BLOCKED: Form submission already in progress, ignoring duplicate submit');
       return;
     }
+    
+    // Check if this is a duplicate submission
+    if (submissionIdRef.current) {
+      console.log('❌ BLOCKED: Duplicate submission detected, ignoring');
+      return;
+    }
+    
+    // Set submission ID to prevent duplicates
+    submissionIdRef.current = currentSubmissionId;
     
     // Immediately disable the form
     if (formRef.current) {
@@ -336,6 +360,8 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
       if (formRef.current) {
         formRef.current.style.pointerEvents = 'auto';
       }
+      // Clear submission ID on validation error
+      submissionIdRef.current = null;
       return;
     }
 
@@ -362,7 +388,8 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
         priority: formData.priority || 'medium',
         effort: formData.effort || 'medium',
         impact: formData.impact || 'medium',
-        tags: formData.tags || []
+        tags: formData.tags || [],
+        submissionId: submissionIdRef.current // Include submission ID
       };
 
       console.log('📤 Calling DataService.createIdea with:', ideaData);
@@ -385,6 +412,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
     } finally {
       console.log('🔄 Setting isSubmitting to false');
       isSubmittingRef.current = false;
+      submissionIdRef.current = null; // Clear submission ID on completion
       // Re-enable the form
       if (formRef.current) {
         formRef.current.style.pointerEvents = 'auto';

@@ -141,6 +141,7 @@ function App() {
       setExperiments([]);
       setBlueprints([]);
       setICPProfiles([]);
+      setIdeas([]);
       setLoading(false);
       return;
     }
@@ -155,6 +156,7 @@ function App() {
       setExperiments([]);
       setBlueprints([]);
       setICPProfiles([]);
+      setIdeas([]);
       setLoading(false);
       return; // Only load data if user is authenticated and approved
     }
@@ -199,7 +201,7 @@ function App() {
     };
 
     loadData();
-  }, [user, appUser]);
+  }, [user?.id, appUser?.status]); // Only reload when user ID or approval status changes
 
   const addExperiment = async (experiment: Omit<Experiment, 'id' | 'createdAt'>) => {
     const newExperiment = await DataService.createExperiment(experiment);
