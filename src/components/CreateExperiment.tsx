@@ -30,6 +30,9 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const aiRecommendation = location.state?.aiRecommendation as AIRecommendation | undefined;
+  const selectedIdea = location.state?.selectedIdea as any;
+  const mode = location.state?.mode as string;
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -373,6 +376,31 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     }
   }, [aiRecommendation, isEditing, id, experiments]);
 
+  // Handle idea data when creating experiment from idea
+  useEffect(() => {
+    if (selectedIdea && (mode === 'from-idea' || mode === 'from-idea-form')) {
+      setFormData(prev => ({
+        ...prev,
+        name: selectedIdea.name || '',
+        description: selectedIdea.description || '',
+        outreachStrategy: selectedIdea.outreachStrategies?.[0] || '',
+        distributionChannel: selectedIdea.distributionChannels?.[0] || '',
+        content: selectedIdea.contentTypes?.[0] || '',
+        messaging: selectedIdea.messagingFocus?.[0] || '',
+        tags: selectedIdea.tags || [],
+        customTargeting: {
+          jobTitles: selectedIdea.targetRoles || [],
+          industries: selectedIdea.industries || [],
+          geographies: [],
+          companySizes: selectedIdea.companySizes || [],
+          companyRevenue: selectedIdea.companyRevenue || [],
+          technologyStack: [],
+          painPoints: selectedIdea.painPoints || [],
+          buyingAuthority: 'decision-maker'
+        }
+      }));
+    }
+  }, [selectedIdea, mode]);
 
 
   const handleSubmit = (e: React.FormEvent) => {

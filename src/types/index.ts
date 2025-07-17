@@ -238,4 +238,27 @@ export interface SuperAdminStats {
   approvedUsers: number;
   rejectedUsers: number;
   suspendedUsers: number;
+}
+
+export interface Idea {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  urls: Array<{ title: string; url: string }>;
+  targetRoles: string[];
+  industries: string[];
+  companySizes: string[];
+  companyRevenue: string[];
+  painPoints: string[];
+  distributionChannels: string[];
+  outreachStrategies: string[];
+  contentTypes: string[];
+  messagingFocus: string[];
+  priority: 'high' | 'medium' | 'low';
+  effort: 'high' | 'medium' | 'low';
+  impact: 'high' | 'medium' | 'low';
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
 } 

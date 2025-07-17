@@ -21,9 +21,11 @@ import SuperAdminDashboard from './components/SuperAdminDashboard';
 import AuthComponent from './components/Auth';
 import PendingApproval from './components/PendingApproval';
 import PasswordResetForm from './components/PasswordResetForm';
-import { Experiment, Blueprint, ICPProfile } from './types';
+import { Experiment, Blueprint, ICPProfile, Idea } from './types';
 import { DataService } from './services/dataService';
 import { UserManagementService } from './services/userManagementService';
+import IdeasHub from './components/IdeasHub';
+import CreateIdea from './components/CreateIdea';
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -34,6 +36,7 @@ function App() {
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
   const [icpProfiles, setICPProfiles] = useState<ICPProfile[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
 
   // Handle password reset redirects
   useEffect(() => {
@@ -161,21 +164,24 @@ function App() {
         console.log('Starting data load for approved user:', user.email);
         setLoading(true);
         
-        const [experimentsData, blueprintsData, icpProfilesData] = await Promise.all([
+        const [experimentsData, blueprintsData, icpProfilesData, ideasData] = await Promise.all([
           DataService.getExperiments(),
           DataService.getBlueprints(),
-          DataService.getICPProfiles()
+          DataService.getICPProfiles(),
+          DataService.getIdeas()
         ]);
         
         console.log('Data loaded successfully:', {
           experiments: experimentsData.length,
           blueprints: blueprintsData.length,
-          icpProfiles: icpProfilesData.length
+          icpProfiles: icpProfilesData.length,
+          ideas: ideasData.length
         });
         
         setExperiments(experimentsData);
         setBlueprints(blueprintsData);
         setICPProfiles(icpProfilesData);
+        setIdeas(ideasData);
       } catch (error) {
         console.error('Error loading data:', error);
         // Show a more user-friendly error message
@@ -186,6 +192,7 @@ function App() {
         setExperiments([]);
         setBlueprints([]);
         setICPProfiles([]);
+        setIdeas([]);
       } finally {
         setLoading(false);
       }
@@ -251,6 +258,27 @@ function App() {
   const deleteICPProfile = async (id: string) => {
     // For now, we'll delete locally. In a full implementation, you'd call DataService.deleteICPProfile
     setICPProfiles(prev => prev.filter(profile => profile.id !== id));
+  };
+
+  const addIdea = async (idea: Omit<Idea, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+    const newIdea = await DataService.createIdea(idea);
+    if (newIdea) {
+      setIdeas(prev => [newIdea, ...prev]);
+    }
+  };
+
+  const updateIdea = async (id: string, updates: Partial<Idea>) => {
+    const updatedIdea = await DataService.updateIdea(id, updates);
+    if (updatedIdea) {
+      setIdeas(prev => prev.map(idea => idea.id === id ? updatedIdea : idea));
+    }
+  };
+
+  const deleteIdea = async (id: string) => {
+    const success = await DataService.deleteIdea(id);
+    if (success) {
+      setIdeas(prev => prev.filter(idea => idea.id !== id));
+    }
   };
 
   if (authLoading || userStatusLoading) {
@@ -389,6 +417,8 @@ function App() {
             <Route path="/experiments/create" element={<CreateExperiment blueprints={blueprints} icpProfiles={icpProfiles} experiments={experiments} onAddExperiment={addExperiment} />} />
             <Route path="/experiments/:id" element={<ExperimentDetail experiments={experiments} onUpdateExperiment={updateExperiment} onDeleteExperiment={deleteExperiment} />} />
             <Route path="/experiments/:id/edit" element={<CreateExperiment blueprints={blueprints} icpProfiles={icpProfiles} experiments={experiments} onAddExperiment={addExperiment} onUpdateExperiment={updateExperiment} isEditing={true} />} />
+            <Route path="/ideas" element={<IdeasHub onAddExperiment={addExperiment} />} />
+            <Route path="/ideas/create" element={<CreateIdea onAddIdea={addIdea} />} />
             <Route path="/blueprints" element={<BlueprintLibrary blueprints={blueprints} experiments={experiments} onAddBlueprint={addBlueprint} onUpdateBlueprint={updateBlueprint} onDeleteBlueprint={deleteBlueprint} />} />
             <Route path="/blueprints/create" element={<CreateBlueprint onAddBlueprint={addBlueprint} />} />
             <Route path="/blueprints/:id" element={<BlueprintDetail blueprints={blueprints} experiments={experiments} onUpdateBlueprint={updateBlueprint} onDeleteBlueprint={deleteBlueprint} />} />

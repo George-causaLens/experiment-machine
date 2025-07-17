@@ -35,6 +35,7 @@ const Navigation: React.FC = () => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
     { name: 'Experiments', href: '/experiments', icon: BeakerIcon },
+    { name: 'Ideas Hub', href: '/ideas', icon: LightBulbIcon },
     { name: 'Blueprints', href: '/blueprints', icon: BookOpenIcon },
     { name: 'AI Recommendations', href: '/ai-recommendations', icon: LightBulbIcon },
     { name: 'ICP Profiles', href: '/icp-profiles', icon: UserGroupIcon },

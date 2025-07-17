@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import { Experiment, Blueprint, ICPProfile } from '../types';
+import { Experiment, Blueprint, ICPProfile, Idea } from '../types';
 
 // Data transformation helpers
 const transformExperiment = (dbExperiment: any): Experiment => ({
@@ -78,6 +78,29 @@ const transformICPProfile = (dbICP: any): ICPProfile => ({
   lastUsed: new Date(dbICP.last_used),
   usageCount: dbICP.usage_count || 0,
   relatedExperiments: dbICP.related_experiments || []
+});
+
+const transformIdea = (dbIdea: any): Idea => ({
+  id: dbIdea.id,
+  userId: dbIdea.user_id,
+  name: dbIdea.name,
+  description: dbIdea.description,
+  urls: dbIdea.urls || [],
+  targetRoles: dbIdea.target_roles || [],
+  industries: dbIdea.industries || [],
+  companySizes: dbIdea.company_sizes || [],
+  companyRevenue: dbIdea.company_revenue || [],
+  painPoints: dbIdea.pain_points || [],
+  distributionChannels: dbIdea.distribution_channels || [],
+  outreachStrategies: dbIdea.outreach_strategies || [],
+  contentTypes: dbIdea.content_types || [],
+  messagingFocus: dbIdea.messaging_focus || [],
+  priority: dbIdea.priority,
+  effort: dbIdea.effort,
+  impact: dbIdea.impact,
+  tags: dbIdea.tags || [],
+  createdAt: new Date(dbIdea.created_at),
+  updatedAt: new Date(dbIdea.updated_at)
 });
 
 // Data service class
@@ -351,5 +374,110 @@ export class DataService {
     }
     
     return data[0] ? transformICPProfile(data[0]) : null;
+  }
+
+  static async getIdeas(): Promise<Idea[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ideas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data.map(transformIdea);
+    } catch (error) {
+      console.error('Error fetching ideas:', error);
+      return [];
+    }
+  }
+
+  static async createIdea(idea: Omit<Idea, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Idea | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('ideas')
+        .insert({
+          user_id: user.id,
+          name: idea.name,
+          description: idea.description,
+          urls: idea.urls,
+          target_roles: idea.targetRoles,
+          industries: idea.industries,
+          company_sizes: idea.companySizes,
+          company_revenue: idea.companyRevenue,
+          pain_points: idea.painPoints,
+          distribution_channels: idea.distributionChannels,
+          outreach_strategies: idea.outreachStrategies,
+          content_types: idea.contentTypes,
+          messaging_focus: idea.messagingFocus,
+          priority: idea.priority,
+          effort: idea.effort,
+          impact: idea.impact,
+          tags: idea.tags
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformIdea(data);
+    } catch (error) {
+      console.error('Error creating idea:', error);
+      return null;
+    }
+  }
+
+  static async updateIdea(id: string, updates: Partial<Idea>): Promise<Idea | null> {
+    try {
+      const updateData: any = {};
+      
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.urls !== undefined) updateData.urls = updates.urls;
+      if (updates.targetRoles !== undefined) updateData.target_roles = updates.targetRoles;
+      if (updates.industries !== undefined) updateData.industries = updates.industries;
+      if (updates.companySizes !== undefined) updateData.company_sizes = updates.companySizes;
+      if (updates.companyRevenue !== undefined) updateData.company_revenue = updates.companyRevenue;
+      if (updates.painPoints !== undefined) updateData.pain_points = updates.painPoints;
+      if (updates.distributionChannels !== undefined) updateData.distribution_channels = updates.distributionChannels;
+      if (updates.outreachStrategies !== undefined) updateData.outreach_strategies = updates.outreachStrategies;
+      if (updates.contentTypes !== undefined) updateData.content_types = updates.contentTypes;
+      if (updates.messagingFocus !== undefined) updateData.messaging_focus = updates.messagingFocus;
+      if (updates.priority !== undefined) updateData.priority = updates.priority;
+      if (updates.effort !== undefined) updateData.effort = updates.effort;
+      if (updates.impact !== undefined) updateData.impact = updates.impact;
+      if (updates.tags !== undefined) updateData.tags = updates.tags;
+      
+      updateData.updated_at = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('ideas')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformIdea(data);
+    } catch (error) {
+      console.error('Error updating idea:', error);
+      return null;
+    }
+  }
+
+  static async deleteIdea(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('ideas')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting idea:', error);
+      return false;
+    }
   }
 } 
