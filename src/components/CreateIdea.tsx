@@ -2,12 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
+  ArrowLeftIcon,
   PlusIcon, 
   MagnifyingGlassIcon,
   TrashIcon,
   PencilIcon,
   ArrowTopRightOnSquareIcon,
-  SparklesIcon
+  SparklesIcon,
+  LightBulbIcon,
+  LinkIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Idea } from '../types';
 import { DataService } from '../services/dataService';
@@ -278,7 +282,7 @@ const CreateIdea: React.FC<CreateIdeaProps> = ({ onAddIdea }) => {
   // Sync ref with state for UI updates
   useEffect(() => {
     setIsSubmitting(isSubmittingRef.current);
-  }, [isSubmittingRef.current]);
+  });
 
   const addUrl = () => {
     setFormData(prev => ({
