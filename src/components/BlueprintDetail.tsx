@@ -40,6 +40,14 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
     blueprint?.relatedExperiments?.includes(exp.id)
   );
 
+  // Helper function to safely handle both string and array values
+  const safeArray = (value: any): string[] => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') return [value];
+    return [];
+  };
+
   if (!blueprint) {
     return (
       <div className="text-center py-12">
@@ -153,8 +161,8 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
                   <div className="space-y-1">
-                    {blueprint.industry && blueprint.industry.length > 0 ? (
-                      blueprint.industry.map((industry, index) => (
+                    {safeArray(blueprint.industry).length > 0 ? (
+                      safeArray(blueprint.industry).map((industry, index) => (
                         <div key={index} className="flex items-center text-gray-900">
                           <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-500" />
                           <span className="text-sm">{industry}</span>
@@ -168,8 +176,8 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Target Roles</label>
                   <div className="space-y-1">
-                    {blueprint.targetRoles && blueprint.targetRoles.length > 0 ? (
-                      blueprint.targetRoles.map((role, index) => (
+                    {safeArray(blueprint.targetRoles).length > 0 ? (
+                      safeArray(blueprint.targetRoles).map((role, index) => (
                         <div key={index} className="flex items-center text-gray-900">
                           <UserGroupIcon className="w-4 h-4 mr-2 text-gray-500" />
                           <span className="text-sm">{role}</span>
@@ -183,8 +191,8 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
                   <div className="space-y-1">
-                    {blueprint.companySize && blueprint.companySize.length > 0 ? (
-                      blueprint.companySize.map((size, index) => (
+                    {safeArray(blueprint.companySize).length > 0 ? (
+                      safeArray(blueprint.companySize).map((size, index) => (
                         <div key={index} className="flex items-center text-gray-900">
                           <UsersIcon className="w-4 h-4 mr-2 text-gray-500" />
                           <span className="text-sm">{size}</span>
@@ -198,8 +206,8 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company Revenue</label>
                   <div className="space-y-1">
-                    {blueprint.companyRevenue && blueprint.companyRevenue.length > 0 ? (
-                      blueprint.companyRevenue.map((revenue, index) => (
+                    {safeArray(blueprint.companyRevenue).length > 0 ? (
+                      safeArray(blueprint.companyRevenue).map((revenue, index) => (
                         <div key={index} className="flex items-center text-gray-900">
                           <CurrencyDollarIcon className="w-4 h-4 mr-2 text-gray-500" />
                           <span className="text-sm">{revenue}</span>
@@ -215,8 +223,8 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Pain Points</label>
                   <div className="space-y-1">
-                    {blueprint.painPoints && blueprint.painPoints.length > 0 ? (
-                      blueprint.painPoints.map((pain, index) => (
+                    {safeArray(blueprint.painPoints).length > 0 ? (
+                      safeArray(blueprint.painPoints).map((pain, index) => (
                         <div key={index} className="flex items-center text-gray-900">
                           <ExclamationTriangleIcon className="w-4 h-4 mr-2 text-gray-500" />
                           <span className="text-sm">{pain}</span>
