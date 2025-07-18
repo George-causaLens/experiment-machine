@@ -48,6 +48,7 @@ export interface Experiment {
   metrics: ExperimentMetrics;
   successScore?: number;
   tags: string[];
+  urls: Array<{ title: string; url: string }>; // NEW: URLs associated with the experiment
   // NEW: ICP Profile or Custom Targeting
   icpProfileId?: string; // If using a predefined ICP profile
   customTargeting?: CustomTargeting; // If using custom targeting values

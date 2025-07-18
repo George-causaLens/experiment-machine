@@ -317,6 +317,40 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Related Links */}
+          {experiment.urls && experiment.urls.length > 0 && (
+            <div className="card">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Related Links</h2>
+              <div className="space-y-3">
+                {experiment.urls.map((url, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      {url.title && (
+                        <div className="text-sm font-medium text-gray-700 mb-1">{url.title}</div>
+                      )}
+                      <a
+                        href={url.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary-600 hover:text-primary-800 break-all"
+                      >
+                        {url.url}
+                      </a>
+                    </div>
+                    <a
+                      href={url.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-3 p-2 text-gray-400 hover:text-gray-600"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}

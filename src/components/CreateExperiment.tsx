@@ -12,7 +12,9 @@ import {
   CurrencyDollarIcon,
   CogIcon,
   ExclamationTriangleIcon,
-  SparklesIcon
+  SparklesIcon,
+  LinkIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { Experiment, Blueprint, ExperimentVariable, SuccessCriteria, ICPProfile, CustomTargeting, AIRecommendation } from '../types';
 
@@ -46,6 +48,7 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     customTargeting: null as CustomTargeting | null,
     endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 30 days from now
     tags: [] as string[],
+    urls: [{ title: '', url: '' }] as Array<{ title: string; url: string }>,
     variables: [] as ExperimentVariable[],
     successCriteria: {
       primaryGoal: 'meetings' as const,
@@ -388,6 +391,7 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
         content: selectedIdea.contentTypes?.[0] || '',
         messaging: selectedIdea.messagingFocus?.[0] || '',
         tags: selectedIdea.tags || [],
+        urls: selectedIdea.urls || [{ title: '', url: '' }],
         customTargeting: {
           jobTitles: selectedIdea.targetRoles || [],
           industries: selectedIdea.industries || [],
@@ -441,7 +445,8 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
       targetAudience: finalTargetAudience,
       variables: formData.variables,
       successCriteria: formData.successCriteria,
-      tags: formData.tags
+      tags: formData.tags,
+      urls: formData.urls.filter(url => url.url.trim()) // Filter out empty URLs
     };
 
     if (isEditing && id && onUpdateExperiment) {
@@ -557,6 +562,30 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     }));
   };
 
+  // URL management functions
+  const addUrl = () => {
+    setFormData(prev => ({
+      ...prev,
+      urls: [...(prev.urls || []), { title: '', url: '' }]
+    }));
+  };
+
+  const removeUrl = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      urls: (prev.urls || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateUrl = (index: number, field: 'title' | 'url', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      urls: (prev.urls || []).map((url, i) => 
+        i === index ? { ...url, [field]: value } : url
+      )
+    }));
+  };
+
 
 
   const selectedBlueprint = blueprints.find(bp => bp.id === formData.blueprintId);
@@ -668,6 +697,49 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
                 placeholder="Describe your experiment strategy and goals..."
               />
             </div>
+          </div>
+        </div>
+
+        {/* URLs/Links */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <LinkIcon className="w-5 h-5 mr-2 text-primary-600" />
+            Related Links
+          </h2>
+          <div className="space-y-4">
+            {(formData.urls || []).map((url, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Link title (optional)"
+                  value={url.title}
+                  onChange={(e) => updateUrl(index, 'title', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+                <input
+                  type="url"
+                  placeholder="URL"
+                  value={url.url}
+                  onChange={(e) => updateUrl(index, 'url', e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeUrl(index)}
+                  className="p-2 text-red-600 hover:text-red-800"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addUrl}
+              className="btn-secondary flex items-center"
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Add Link
+            </button>
           </div>
         </div>
 

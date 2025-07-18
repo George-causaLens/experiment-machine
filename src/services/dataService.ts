@@ -31,6 +31,7 @@ const transformExperiment = (dbExperiment: any): Experiment => ({
   },
   successScore: dbExperiment.success_score,
   tags: dbExperiment.tags || [],
+  urls: dbExperiment.urls || [],
   icpProfileId: dbExperiment.icp_profile_id,
   customTargeting: dbExperiment.custom_targeting,
   targetAudience: dbExperiment.target_audience,
@@ -144,6 +145,7 @@ export class DataService {
       metrics: experiment.metrics,
       success_score: experiment.successScore,
       tags: experiment.tags,
+      urls: experiment.urls,
       icp_profile_id: experiment.icpProfileId,
       custom_targeting: experiment.customTargeting,
       target_audience: experiment.targetAudience,
@@ -183,6 +185,7 @@ export class DataService {
     if (updates.metrics !== undefined) dbUpdates.metrics = updates.metrics;
     if (updates.successScore !== undefined) dbUpdates.success_score = updates.successScore;
     if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+    if (updates.urls !== undefined) dbUpdates.urls = updates.urls;
     if (updates.icpProfileId !== undefined) dbUpdates.icp_profile_id = updates.icpProfileId;
     if (updates.customTargeting !== undefined) dbUpdates.custom_targeting = updates.customTargeting;
     if (updates.targetAudience !== undefined) dbUpdates.target_audience = updates.targetAudience;
