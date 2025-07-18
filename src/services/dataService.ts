@@ -376,6 +376,56 @@ export class DataService {
     return data[0] ? transformICPProfile(data[0]) : null;
   }
 
+  static async updateICPProfile(id: string, updates: Partial<ICPProfile>): Promise<ICPProfile | null> {
+    try {
+      const updateData: any = {};
+      
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.jobTitles !== undefined) updateData.job_titles = updates.jobTitles;
+      if (updates.industries !== undefined) updateData.industries = updates.industries;
+      if (updates.geographies !== undefined) updateData.geographies = updates.geographies;
+      if (updates.companySizes !== undefined) updateData.company_sizes = updates.companySizes;
+      if (updates.companyRevenue !== undefined) updateData.company_revenue = updates.companyRevenue;
+      if (updates.technologyStack !== undefined) updateData.technology_stack = updates.technologyStack;
+      if (updates.painPoints !== undefined) updateData.pain_points = updates.painPoints;
+      if (updates.buyingAuthority !== undefined) updateData.buying_authority = updates.buyingAuthority;
+      if (updates.tags !== undefined) updateData.tags = updates.tags;
+      if (updates.usageCount !== undefined) updateData.usage_count = updates.usageCount;
+      if (updates.relatedExperiments !== undefined) updateData.related_experiments = updates.relatedExperiments;
+      
+      updateData.last_used = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('icp_profiles')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformICPProfile(data);
+    } catch (error) {
+      console.error('Error updating ICP profile:', error);
+      return null;
+    }
+  }
+
+  static async deleteICPProfile(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('icp_profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting ICP profile:', error);
+      return false;
+    }
+  }
+
   static async getIdeas(): Promise<Idea[]> {
     try {
       const { data, error } = await supabase

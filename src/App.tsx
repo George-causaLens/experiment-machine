@@ -356,13 +356,17 @@ function App() {
   };
 
   const updateICPProfile = async (id: string, updates: Partial<ICPProfile>) => {
-    // For now, we'll update locally. In a full implementation, you'd call DataService.updateICPProfile
-    setICPProfiles(prev => prev.map(profile => profile.id === id ? { ...profile, ...updates } : profile));
+    const updatedProfile = await DataService.updateICPProfile(id, updates);
+    if (updatedProfile) {
+      setICPProfiles(prev => prev.map(profile => profile.id === id ? updatedProfile : profile));
+    }
   };
 
   const deleteICPProfile = async (id: string) => {
-    // For now, we'll delete locally. In a full implementation, you'd call DataService.deleteICPProfile
-    setICPProfiles(prev => prev.filter(profile => profile.id !== id));
+    const success = await DataService.deleteICPProfile(id);
+    if (success) {
+      setICPProfiles(prev => prev.filter(profile => profile.id !== id));
+    }
   };
 
   const addIdea = async (idea: Idea) => {
