@@ -39,8 +39,19 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
     blueprints: blueprints
   });
 
+  // Helper function to safely handle both string and array data
+  const safeArray = (value: any): string[] => {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'string' && value.trim()) {
+      return [value];
+    }
+    return [];
+  };
+
   // Get unique categories from all blueprint industries
-  const allIndustries = blueprints.flatMap(bp => bp.industry || []);
+  const allIndustries = blueprints.flatMap(bp => safeArray(bp.industry));
   const categories = ['all', ...Array.from(new Set(allIndustries))];
 
   const filteredBlueprints = blueprints.filter(blueprint => {
@@ -49,7 +60,7 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
       blueprint.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = selectedCategory === 'all' || 
-      (blueprint.industry && blueprint.industry.includes(selectedCategory));
+      safeArray(blueprint.industry).includes(selectedCategory);
     
     return matchesSearch && matchesCategory;
   });
@@ -129,10 +140,12 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                    {blueprint.industry && blueprint.industry.length > 0 
-                      ? blueprint.industry.slice(0, 2).join(', ') + (blueprint.industry.length > 2 ? '...' : '')
-                      : 'Not specified'
-                    }
+                    {(() => {
+                      const industries = safeArray(blueprint.industry);
+                      return industries.length > 0 
+                        ? industries.slice(0, 2).join(', ') + (industries.length > 2 ? '...' : '')
+                        : 'Not specified';
+                    })()}
                   </span>
                   <div className="flex items-center text-yellow-500">
                     <StarIcon className="w-4 h-4 fill-current" />
@@ -147,42 +160,52 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
                   <div>
                     <div className="text-gray-500">Target Roles</div>
                     <div className="font-medium text-gray-900">
-                      {blueprint.targetRoles && blueprint.targetRoles.length > 0 
-                        ? blueprint.targetRoles.slice(0, 2).join(', ') + (blueprint.targetRoles.length > 2 ? '...' : '')
-                        : 'Not specified'
-                      }
+                      {(() => {
+                        const roles = safeArray(blueprint.targetRoles);
+                        return roles.length > 0 
+                          ? roles.slice(0, 2).join(', ') + (roles.length > 2 ? '...' : '')
+                          : 'Not specified';
+                      })()}
                     </div>
                   </div>
                   <div>
                     <div className="text-gray-500">Company Size</div>
                     <div className="font-medium text-gray-900">
-                      {blueprint.companySize && blueprint.companySize.length > 0 
-                        ? blueprint.companySize.slice(0, 2).join(', ') + (blueprint.companySize.length > 2 ? '...' : '')
-                        : 'Not specified'
-                      }
+                      {(() => {
+                        const sizes = safeArray(blueprint.companySize);
+                        return sizes.length > 0 
+                          ? sizes.slice(0, 2).join(', ') + (sizes.length > 2 ? '...' : '')
+                          : 'Not specified';
+                      })()}
                     </div>
                   </div>
                 </div>
                 
                 {/* Company Revenue */}
-                {blueprint.companyRevenue && blueprint.companyRevenue.length > 0 && (
-                  <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-1">Company Revenue</div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {blueprint.companyRevenue.slice(0, 2).join(', ') + (blueprint.companyRevenue.length > 2 ? '...' : '')}
+                {(() => {
+                  const revenue = safeArray(blueprint.companyRevenue);
+                  return revenue.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-xs text-gray-500 mb-1">Company Revenue</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {revenue.slice(0, 2).join(', ') + (revenue.length > 2 ? '...' : '')}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 
                 {/* Pain Points */}
-                {blueprint.painPoints && blueprint.painPoints.length > 0 && (
-                  <div className="mb-4">
-                    <div className="text-xs text-gray-500 mb-1">Pain Points</div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {blueprint.painPoints.slice(0, 2).join(', ') + (blueprint.painPoints.length > 2 ? '...' : '')}
+                {(() => {
+                  const painPoints = safeArray(blueprint.painPoints);
+                  return painPoints.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-xs text-gray-500 mb-1">Pain Points</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {painPoints.slice(0, 2).join(', ') + (painPoints.length > 2 ? '...' : '')}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 
                 <div className="mb-4">
                   <div className="text-xs text-gray-500 mb-1">Automation</div>
