@@ -339,6 +339,7 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
           customTargeting: null,
           endDate: existingExperiment.endDate.toISOString().split('T')[0],
           tags: existingExperiment.tags,
+          urls: existingExperiment.urls || [{ title: '', url: '' }],
           variables: existingExperiment.variables,
           successCriteria: existingExperiment.successCriteria
         });
