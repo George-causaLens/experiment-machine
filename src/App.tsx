@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import { Toaster } from 'react-hot-toast';
@@ -21,11 +21,13 @@ import SuperAdminDashboard from './components/SuperAdminDashboard';
 import AuthComponent from './components/Auth';
 import PendingApproval from './components/PendingApproval';
 import PasswordResetForm from './components/PasswordResetForm';
+import IdeasHub from './components/IdeasHub';
+import CreateIdea from './components/CreateIdea';
+import EditIdea from './components/EditIdea';
 import { Experiment, Blueprint, ICPProfile, Idea } from './types';
 import { DataService } from './services/dataService';
 import { UserManagementService } from './services/userManagementService';
-import IdeasHub from './components/IdeasHub';
-import CreateIdea from './components/CreateIdea';
+import { ErrorHandler } from './utils/errorHandler';
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -520,6 +522,7 @@ function App() {
             <Route path="/experiments/:id/edit" element={<CreateExperiment blueprints={blueprints} icpProfiles={icpProfiles} experiments={experiments} onAddExperiment={addExperiment} onUpdateExperiment={updateExperiment} isEditing={true} />} />
             <Route path="/ideas" element={<IdeasHub onAddExperiment={addExperiment} />} />
             <Route path="/ideas/create" element={<CreateIdea onAddIdea={addIdea} />} />
+            <Route path="/ideas/:id/edit" element={<EditIdea onUpdateIdea={updateIdea} />} />
             <Route path="/blueprints" element={<BlueprintLibrary blueprints={blueprints} experiments={experiments} onAddBlueprint={addBlueprint} onUpdateBlueprint={updateBlueprint} onDeleteBlueprint={deleteBlueprint} />} />
             <Route path="/blueprints/create" element={<CreateBlueprint onAddBlueprint={addBlueprint} />} />
             <Route path="/blueprints/:id" element={<BlueprintDetail blueprints={blueprints} experiments={experiments} onUpdateBlueprint={updateBlueprint} onDeleteBlueprint={deleteBlueprint} />} />
