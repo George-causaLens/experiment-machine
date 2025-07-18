@@ -32,6 +32,13 @@ const BlueprintLibrary: React.FC<BlueprintLibraryProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  // Debug logging
+  console.log('BlueprintLibrary render:', {
+    blueprintsCount: blueprints?.length,
+    experimentsCount: experiments?.length,
+    blueprints: blueprints
+  });
+
   // Get unique categories from all blueprint industries
   const allIndustries = blueprints.flatMap(bp => bp.industry || []);
   const categories = ['all', ...Array.from(new Set(allIndustries))];
