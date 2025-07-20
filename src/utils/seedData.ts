@@ -118,6 +118,7 @@ export const seedSampleData = async () => {
       },
       successScore: 85,
       tags: ['linkedin', 'coo', 'manufacturing', 'technical-pain-points'],
+      urls: [],
       icpProfileId: icp1?.id
     });
 
