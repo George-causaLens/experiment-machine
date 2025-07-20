@@ -227,6 +227,17 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (formData.industry.length === 0) {
+      alert('Please select at least one industry');
+      return;
+    }
+    
+    if (formData.companySize.length === 0) {
+      alert('Please select at least one company size');
+      return;
+    }
+    
     const newBlueprint: Blueprint = {
       id: `bp-${Date.now()}`,
       name: formData.name,
@@ -294,7 +305,6 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
                 Industry *
               </label>
               <select
-                required
                 value={newIndustry}
                 onChange={(e) => setNewIndustry(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -323,7 +333,6 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
                 Company Size *
               </label>
               <select
-                required
                 value={newCompanySize}
                 onChange={(e) => setNewCompanySize(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"

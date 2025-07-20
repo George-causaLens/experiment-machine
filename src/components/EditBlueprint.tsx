@@ -287,6 +287,18 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.industry || formData.industry.length === 0) {
+      alert('Please select at least one industry');
+      return;
+    }
+    
+    if (!formData.companySize || formData.companySize.length === 0) {
+      alert('Please select at least one company size');
+      return;
+    }
+    
     onUpdateBlueprint(blueprint.id, formData);
     navigate(`/blueprints/${blueprint.id}`);
   };
@@ -337,7 +349,6 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
                 value={newIndustry}
                 onChange={(e) => setNewIndustry(e.target.value)}
                 className="form-select w-full"
-                required
               >
                 <option value="">Select Industry</option>
                 <option value="Manufacturing">Manufacturing</option>
@@ -366,7 +377,6 @@ const EditBlueprint: React.FC<EditBlueprintProps> = ({
                 value={newCompanySize}
                 onChange={(e) => setNewCompanySize(e.target.value)}
                 className="form-select w-full"
-                required
               >
                 <option value="">Select Company Size</option>
                 <option value="1-10 employees">1-10 employees</option>
