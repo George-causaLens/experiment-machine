@@ -238,8 +238,7 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
       return;
     }
     
-    const newBlueprint: Blueprint = {
-      id: `bp-${Date.now()}`,
+    const newBlueprint = {
       name: formData.name,
       description: formData.description,
       industry: formData.industry,
@@ -255,8 +254,6 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
       totalRevenue: 0,
       conversionRate: 0,
       tags: [],
-      createdAt: new Date(),
-      lastUsed: new Date(),
       usageCount: 0,
       relatedExperiments: []
     };
