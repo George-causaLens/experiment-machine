@@ -129,6 +129,46 @@ export class DataService {
       return null;
     }
 
+    // Extract targeting data for individual columns
+    let targetJobTitles: string[] = [];
+    let targetIndustries: string[] = [];
+    let targetCompanySizes: string[] = [];
+    let targetCompanyRevenue: string[] = [];
+    let targetPainPoints: string[] = [];
+    let targetGeographies: string[] = [];
+    let targetTechnologyStack: string[] = [];
+    let targetBuyingAuthority = 'decision-maker';
+
+    if (experiment.icpProfileId) {
+      // Get ICP profile data
+      const { data: icpProfile } = await supabase
+        .from('icp_profiles')
+        .select('*')
+        .eq('id', experiment.icpProfileId)
+        .single();
+      
+      if (icpProfile) {
+        targetJobTitles = icpProfile.job_titles || [];
+        targetIndustries = icpProfile.industries || [];
+        targetCompanySizes = icpProfile.company_sizes || [];
+        targetCompanyRevenue = icpProfile.company_revenue || [];
+        targetPainPoints = icpProfile.pain_points || [];
+        targetGeographies = icpProfile.geographies || [];
+        targetTechnologyStack = icpProfile.technology_stack || [];
+        targetBuyingAuthority = icpProfile.buying_authority || 'decision-maker';
+      }
+    } else if (experiment.customTargeting) {
+      // Extract from custom targeting
+      targetJobTitles = experiment.customTargeting.jobTitles || [];
+      targetIndustries = experiment.customTargeting.industries || [];
+      targetCompanySizes = experiment.customTargeting.companySizes || [];
+      targetCompanyRevenue = experiment.customTargeting.companyRevenue || [];
+      targetPainPoints = experiment.customTargeting.painPoints || [];
+      targetGeographies = experiment.customTargeting.geographies || [];
+      targetTechnologyStack = experiment.customTargeting.technologyStack || [];
+      targetBuyingAuthority = experiment.customTargeting.buyingAuthority || 'decision-maker';
+    }
+
     const dbExperiment = {
       name: experiment.name,
       description: experiment.description,
@@ -151,6 +191,15 @@ export class DataService {
       target_audience: experiment.targetAudience,
       success_criteria: experiment.successCriteria,
       integration_tracking: experiment.integrationTracking,
+      // Individual targeting columns for analysis
+      target_job_titles: targetJobTitles,
+      target_industries: targetIndustries,
+      target_company_sizes: targetCompanySizes,
+      target_company_revenue: targetCompanyRevenue,
+      target_pain_points: targetPainPoints,
+      target_geographies: targetGeographies,
+      target_technology_stack: targetTechnologyStack,
+      target_buying_authority: targetBuyingAuthority,
       user_id: user.id
     };
 
@@ -194,6 +243,57 @@ export class DataService {
     if (updates.targetAudience !== undefined) dbUpdates.target_audience = updates.targetAudience;
     if (updates.successCriteria !== undefined) dbUpdates.success_criteria = updates.successCriteria;
     if (updates.integrationTracking !== undefined) dbUpdates.integration_tracking = updates.integrationTracking;
+
+    // Update individual targeting columns if targeting data changed
+    if (updates.icpProfileId !== undefined || updates.customTargeting !== undefined) {
+      let targetJobTitles: string[] = [];
+      let targetIndustries: string[] = [];
+      let targetCompanySizes: string[] = [];
+      let targetCompanyRevenue: string[] = [];
+      let targetPainPoints: string[] = [];
+      let targetGeographies: string[] = [];
+      let targetTechnologyStack: string[] = [];
+      let targetBuyingAuthority = 'decision-maker';
+
+      if (updates.icpProfileId) {
+        // Get ICP profile data
+        const { data: icpProfile } = await supabase
+          .from('icp_profiles')
+          .select('*')
+          .eq('id', updates.icpProfileId)
+          .single();
+        
+        if (icpProfile) {
+          targetJobTitles = icpProfile.job_titles || [];
+          targetIndustries = icpProfile.industries || [];
+          targetCompanySizes = icpProfile.company_sizes || [];
+          targetCompanyRevenue = icpProfile.company_revenue || [];
+          targetPainPoints = icpProfile.pain_points || [];
+          targetGeographies = icpProfile.geographies || [];
+          targetTechnologyStack = icpProfile.technology_stack || [];
+          targetBuyingAuthority = icpProfile.buying_authority || 'decision-maker';
+        }
+      } else if (updates.customTargeting) {
+        // Extract from custom targeting
+        targetJobTitles = updates.customTargeting.jobTitles || [];
+        targetIndustries = updates.customTargeting.industries || [];
+        targetCompanySizes = updates.customTargeting.companySizes || [];
+        targetCompanyRevenue = updates.customTargeting.companyRevenue || [];
+        targetPainPoints = updates.customTargeting.painPoints || [];
+        targetGeographies = updates.customTargeting.geographies || [];
+        targetTechnologyStack = updates.customTargeting.technologyStack || [];
+        targetBuyingAuthority = updates.customTargeting.buyingAuthority || 'decision-maker';
+      }
+
+      dbUpdates.target_job_titles = targetJobTitles;
+      dbUpdates.target_industries = targetIndustries;
+      dbUpdates.target_company_sizes = targetCompanySizes;
+      dbUpdates.target_company_revenue = targetCompanyRevenue;
+      dbUpdates.target_pain_points = targetPainPoints;
+      dbUpdates.target_geographies = targetGeographies;
+      dbUpdates.target_technology_stack = targetTechnologyStack;
+      dbUpdates.target_buying_authority = targetBuyingAuthority;
+    }
 
     const { data, error } = await supabase
       .from('experiments')
