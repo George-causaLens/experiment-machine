@@ -411,12 +411,22 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('isEditing:', isEditing);
+    console.log('id:', id);
+    console.log('onUpdateExperiment exists:', !!onUpdateExperiment);
+    console.log('formData.selectedIcpProfileId:', formData.selectedIcpProfileId);
+    console.log('formData.customTargeting:', formData.customTargeting);
+    
     // Validate that either an ICP profile is selected or custom targeting is filled out
     // Skip this validation when editing an existing experiment
     if (!isEditing && !formData.selectedIcpProfileId && (!formData.customTargeting || !formData.customTargeting.jobTitles.length || !formData.customTargeting.industries.length || !formData.customTargeting.companySizes.length)) {
+      console.log('VALIDATION FAILED - returning early');
       // Show error message in UI instead of alert
       return;
     }
+    
+    console.log('VALIDATION PASSED - continuing with submission');
     
     // Determine target audience based on ICP profile or custom targeting
     let finalTargetAudience = formData.targetAudience;
@@ -452,10 +462,14 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     };
 
     if (isEditing && id && onUpdateExperiment) {
+      console.log('UPDATING EXISTING EXPERIMENT');
+      console.log('id:', id);
+      console.log('experimentData:', experimentData);
       // Update existing experiment
       onUpdateExperiment(id, experimentData);
       navigate(`/experiments/${id}`);
     } else {
+      console.log('CREATING NEW EXPERIMENT');
       // Create new experiment
       const newExperiment: Experiment = {
         id: `exp-${Date.now()}`,
