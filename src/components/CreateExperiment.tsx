@@ -335,14 +335,21 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
           content: existingExperiment.content,
           distributionChannel: existingExperiment.distributionChannel,
           targetAudience: existingExperiment.targetAudience,
-          selectedIcpProfileId: '',
-          customTargeting: null,
+          selectedIcpProfileId: existingExperiment.icpProfileId || '',
+          customTargeting: existingExperiment.customTargeting || null,
           endDate: existingExperiment.endDate.toISOString().split('T')[0],
           tags: existingExperiment.tags,
           urls: existingExperiment.urls || [{ title: '', url: '' }],
           variables: existingExperiment.variables,
           successCriteria: existingExperiment.successCriteria
         });
+        
+        // Set the custom targeting visibility based on the experiment data
+        if (existingExperiment.customTargeting) {
+          setShowCustomTargeting(true);
+        } else if (existingExperiment.icpProfileId) {
+          setShowCustomTargeting(false);
+        }
       }
     } else if (aiRecommendation) {
       const suggestedVariables = aiRecommendation.suggestedVariables || [];
