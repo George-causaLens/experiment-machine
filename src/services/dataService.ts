@@ -244,25 +244,27 @@ export class DataService {
     }
 
     const dbBlueprint = {
-      name: blueprint.name,
-      description: blueprint.description,
-      industry: blueprint.industry,
-      target_roles: blueprint.targetRoles,
-      company_size: blueprint.companySize,
-      company_revenue: blueprint.companyRevenue,
-      pain_points: blueprint.painPoints,
-      automation: blueprint.automation,
-      value_proposition: blueprint.valueProposition,
-      success_rate: blueprint.successRate,
-      avg_roi: blueprint.avgRoi,
-      avg_meetings_booked: blueprint.avgMeetingsBooked,
-      total_revenue: blueprint.totalRevenue,
-      conversion_rate: blueprint.conversionRate,
-      tags: blueprint.tags,
-      usage_count: blueprint.usageCount,
-      related_experiments: blueprint.relatedExperiments,
+      name: blueprint.name || '',
+      description: blueprint.description || '',
+      industry: blueprint.industry && blueprint.industry.length ? blueprint.industry : [],
+      target_roles: blueprint.targetRoles && blueprint.targetRoles.length ? blueprint.targetRoles : [],
+      company_size: blueprint.companySize && blueprint.companySize.length ? blueprint.companySize : [],
+      company_revenue: blueprint.companyRevenue || [],
+      pain_points: blueprint.painPoints || [],
+      automation: blueprint.automation || '',
+      value_proposition: blueprint.valueProposition || '',
+      success_rate: blueprint.successRate ?? 0,
+      avg_roi: blueprint.avgRoi ?? 0,
+      avg_meetings_booked: blueprint.avgMeetingsBooked ?? 0,
+      total_revenue: blueprint.totalRevenue ?? 0,
+      conversion_rate: blueprint.conversionRate ?? 0,
+      tags: blueprint.tags || [],
+      usage_count: blueprint.usageCount ?? 0,
+      related_experiments: blueprint.relatedExperiments || [],
       user_id: user.id
     };
+
+    console.log('Attempting to insert blueprint:', dbBlueprint);
 
     const { data, error } = await supabase
       .from('blueprints')
