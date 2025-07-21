@@ -264,7 +264,7 @@ export class DataService {
       user_id: user.id
     };
 
-    console.log('Attempting to insert blueprint:', dbBlueprint);
+    console.log('Attempting to insert blueprint:', JSON.stringify(dbBlueprint, null, 2));
 
     const { data, error } = await supabase
       .from('blueprints')
@@ -272,7 +272,8 @@ export class DataService {
       .select();
     
     if (error) {
-      console.error('Error creating blueprint:', error);
+      console.error('Error creating blueprint:', error, 'Payload:', dbBlueprint);
+      alert('Supabase error: ' + (error.message || JSON.stringify(error))); // Added for debugging
       return null;
     }
     
