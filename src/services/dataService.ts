@@ -238,8 +238,17 @@ export class DataService {
     if (updates.successScore !== undefined) dbUpdates.success_score = updates.successScore;
     if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
     if (updates.urls !== undefined) dbUpdates.urls = updates.urls;
-    if (updates.icpProfileId !== undefined) dbUpdates.icp_profile_id = updates.icpProfileId;
-    if (updates.customTargeting !== undefined) dbUpdates.custom_targeting = updates.customTargeting;
+    // Handle targeting updates - ensure mutual exclusivity
+    if (updates.icpProfileId !== undefined) {
+      dbUpdates.icp_profile_id = updates.icpProfileId;
+      // Clear custom targeting when setting ICP profile
+      dbUpdates.custom_targeting = null;
+    }
+    if (updates.customTargeting !== undefined) {
+      dbUpdates.custom_targeting = updates.customTargeting;
+      // Clear ICP profile when setting custom targeting
+      dbUpdates.icp_profile_id = null;
+    }
     if (updates.targetAudience !== undefined) dbUpdates.target_audience = updates.targetAudience;
     if (updates.successCriteria !== undefined) dbUpdates.success_criteria = updates.successCriteria;
     if (updates.integrationTracking !== undefined) dbUpdates.integration_tracking = updates.integrationTracking;
@@ -284,6 +293,7 @@ export class DataService {
         targetTechnologyStack = updates.customTargeting.technologyStack || [];
         targetBuyingAuthority = updates.customTargeting.buyingAuthority || 'decision-maker';
       }
+      // If both are null/undefined, the arrays will remain empty (clearing targeting data)
 
       dbUpdates.target_job_titles = targetJobTitles;
       dbUpdates.target_industries = targetIndustries;
