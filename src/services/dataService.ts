@@ -154,13 +154,16 @@ export class DataService {
       user_id: user.id
     };
 
+    console.log('Attempting to insert experiment:', JSON.stringify(dbExperiment, null, 2));
+
     const { data, error } = await supabase
       .from('experiments')
       .insert([dbExperiment])
       .select();
     
     if (error) {
-      console.error('Error creating experiment:', error);
+      console.error('Error creating experiment:', error, 'Payload:', dbExperiment);
+      alert('Supabase error: ' + (error.message || JSON.stringify(error))); // Added for debugging
       return null;
     }
     
