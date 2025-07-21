@@ -331,7 +331,9 @@ function App() {
     const newBlueprint = await DataService.createBlueprint(blueprint);
     if (newBlueprint) {
       setBlueprints(prev => [newBlueprint, ...prev]);
+      return true;
     }
+    return false;
   };
 
   const updateBlueprint = async (id: string, updates: Partial<Blueprint>) => {

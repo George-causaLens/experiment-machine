@@ -224,7 +224,7 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
@@ -258,7 +258,11 @@ const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => 
       relatedExperiments: []
     };
 
-    onAddBlueprint(newBlueprint);
+    const result = await onAddBlueprint(newBlueprint);
+    if (!result) {
+      alert('Failed to create blueprint. Please check your input or try again.');
+      return;
+    }
     navigate('/blueprints');
   };
 
