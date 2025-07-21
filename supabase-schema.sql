@@ -17,11 +17,13 @@ CREATE TABLE experiments (
   metrics JSONB DEFAULT '{}',
   success_score NUMERIC(5,2),
   tags TEXT[] DEFAULT '{}',
+  urls JSONB DEFAULT '[]', -- Array of objects with {title: string, url: string}
   icp_profile_id TEXT,
   custom_targeting JSONB,
   target_audience TEXT NOT NULL,
   success_criteria JSONB NOT NULL,
-  integration_tracking JSONB DEFAULT '[]'
+  integration_tracking JSONB DEFAULT '[]',
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
 -- Create blueprints table

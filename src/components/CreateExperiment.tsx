@@ -448,7 +448,10 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
       variables: formData.variables,
       successCriteria: formData.successCriteria,
       tags: formData.tags,
-      urls: formData.urls.filter(url => url.url.trim()) // Filter out empty URLs
+      urls: formData.urls.filter(url => url.url.trim()), // Filter out empty URLs
+      // CRITICAL: Include the actual targeting data for analysis
+      icpProfileId: formData.selectedIcpProfileId || undefined,
+      customTargeting: formData.customTargeting || undefined
     };
 
     if (isEditing && id && onUpdateExperiment) {
