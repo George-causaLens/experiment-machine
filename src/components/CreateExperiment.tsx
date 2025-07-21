@@ -414,51 +414,71 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     }
   }, [selectedIdea, mode]);
 
+  // Enforce mutual exclusivity between ICP profile and custom targeting
+  useEffect(() => {
+    if (formData.selectedIcpProfileId && formData.customTargeting) {
+      // If both are set, clear customTargeting
+      setFormData(prev => ({ ...prev, customTargeting: null }));
+    }
+    if (!formData.selectedIcpProfileId && !formData.customTargeting && !showCustomTargeting) {
+      // If neither is set, default to ICP profile mode
+      setShowCustomTargeting(false);
+    }
+  }, [formData.selectedIcpProfileId, formData.customTargeting]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Enforce mutual exclusivity before submission
+    let targetingData = { ...formData };
+    if (targetingData.selectedIcpProfileId) {
+      targetingData.customTargeting = null;
+    } else if (targetingData.customTargeting) {
+      targetingData.selectedIcpProfileId = '';
+    }
+
     // Validate that either an ICP profile is selected or custom targeting is filled out
     // Skip this validation when editing an existing experiment
-    if (!isEditing && !formData.selectedIcpProfileId && (!formData.customTargeting || !formData.customTargeting.jobTitles.length || !formData.customTargeting.industries.length || !formData.customTargeting.companySizes.length)) {
+    if (!isEditing && !targetingData.selectedIcpProfileId && (!targetingData.customTargeting || !targetingData.customTargeting.jobTitles.length || !targetingData.customTargeting.industries.length || !targetingData.customTargeting.companySizes.length)) {
       // Show error message in UI instead of alert
       return;
     }
     
     // Determine target audience based on ICP profile or custom targeting
     let finalTargetAudience = formData.targetAudience;
-    if (formData.selectedIcpProfileId) {
-      const selectedProfile = icpProfiles.find(profile => profile.id === formData.selectedIcpProfileId);
+    if (targetingData.selectedIcpProfileId) {
+      const selectedProfile = icpProfiles.find(profile => profile.id === targetingData.selectedIcpProfileId);
       if (selectedProfile) {
         const jobTitle = selectedProfile.jobTitles[0] || 'Decision Maker';
         const industry = selectedProfile.industries[0] || 'Various';
         const companySize = selectedProfile.companySizes[0] || 'Various';
         finalTargetAudience = `${jobTitle} at ${companySize} companies in ${industry}`;
       }
-    } else if (formData.customTargeting) {
-      const jobTitle = formData.customTargeting.jobTitles[0] || 'Decision Maker';
-      const industry = formData.customTargeting.industries[0] || 'Various';
-      const companySize = formData.customTargeting.companySizes[0] || 'Various';
+    } else if (targetingData.customTargeting) {
+      const jobTitle = targetingData.customTargeting.jobTitles[0] || 'Decision Maker';
+      const industry = targetingData.customTargeting.industries[0] || 'Various';
+      const companySize = targetingData.customTargeting.companySizes[0] || 'Various';
       finalTargetAudience = `${jobTitle} at ${companySize} companies in ${industry}`;
     }
     
     const experimentData: Partial<Experiment> = {
-      name: formData.name,
-      description: formData.description,
-      endDate: new Date(formData.endDate),
-      blueprintId: formData.blueprintId,
-      outreachStrategy: formData.outreachStrategy,
-      messaging: formData.messaging,
-      content: formData.content,
-      distributionChannel: formData.distributionChannel,
+      name: targetingData.name,
+      description: targetingData.description,
+      endDate: new Date(targetingData.endDate),
+      blueprintId: targetingData.blueprintId,
+      outreachStrategy: targetingData.outreachStrategy,
+      messaging: targetingData.messaging,
+      content: targetingData.content,
+      distributionChannel: targetingData.distributionChannel,
       targetAudience: finalTargetAudience,
-      variables: formData.variables,
-      successCriteria: formData.successCriteria,
-      tags: formData.tags,
-      urls: formData.urls.filter(url => url.url.trim()), // Filter out empty URLs
+      variables: targetingData.variables,
+      successCriteria: targetingData.successCriteria,
+      tags: targetingData.tags,
+      urls: targetingData.urls.filter(url => url.url.trim()), // Filter out empty URLs
       // CRITICAL: Include the actual targeting data for analysis
-      icpProfileId: formData.selectedIcpProfileId || undefined,
-      customTargeting: formData.customTargeting || undefined
+      icpProfileId: targetingData.selectedIcpProfileId || undefined,
+      customTargeting: targetingData.customTargeting || undefined
     };
 
     if (isEditing && id && onUpdateExperiment) {
