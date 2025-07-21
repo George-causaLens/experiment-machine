@@ -105,14 +105,14 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               <UserGroupIcon className="w-4 h-4 text-blue-600" />
               <span className="font-medium text-blue-600">ICP Profile: {icpProfile.name}</span>
             </div>
-            <div className="text-sm text-gray-600 ml-6">
-              <div>Job Titles: {icpProfile.jobTitles.join(', ')}</div>
-              <div>Industries: {icpProfile.industries.join(', ')}</div>
-              <div>Company Sizes: {icpProfile.companySizes.join(', ')}</div>
-              {icpProfile.painPoints.length > 0 && (
-                <div>Pain Points: {icpProfile.painPoints.join(', ')}</div>
-              )}
-            </div>
+                          <div className="text-sm text-gray-600 ml-6">
+                <div>Job Titles: {icpProfile.jobTitles.join(', ')}</div>
+                <div>Industries: {icpProfile.industries.join(', ')}</div>
+                <div>Company Sizes: {icpProfile.companySizes.join(', ')}</div>
+                {icpProfile.painPoints && icpProfile.painPoints.length > 0 && (
+                  <div>Pain Points: {icpProfile.painPoints.join(', ')}</div>
+                )}
+              </div>
           </div>
         );
       }
