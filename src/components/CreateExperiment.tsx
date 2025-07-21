@@ -412,7 +412,8 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     e.preventDefault();
     
     // Validate that either an ICP profile is selected or custom targeting is filled out
-    if (!formData.selectedIcpProfileId && (!formData.customTargeting || !formData.customTargeting.jobTitles.length || !formData.customTargeting.industries.length || !formData.customTargeting.companySizes.length)) {
+    // Skip this validation when editing an existing experiment
+    if (!isEditing && !formData.selectedIcpProfileId && (!formData.customTargeting || !formData.customTargeting.jobTitles.length || !formData.customTargeting.industries.length || !formData.customTargeting.companySizes.length)) {
       // Show error message in UI instead of alert
       return;
     }
@@ -1597,7 +1598,7 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
             type="submit"
             className="btn-primary"
           >
-            Create Experiment
+            {isEditing ? 'Update Experiment' : 'Create Experiment'}
           </button>
         </div>
       </form>
