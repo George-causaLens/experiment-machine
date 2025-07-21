@@ -524,7 +524,7 @@ function App() {
             <Route path="/" element={<Dashboard experiments={experiments} blueprints={blueprints} />} />
             <Route path="/experiments" element={<ExperimentManager experiments={experiments} blueprints={blueprints} onAddExperiment={addExperiment} onUpdateExperiment={updateExperiment} onDeleteExperiment={deleteExperiment} />} />
             <Route path="/experiments/create" element={<CreateExperiment blueprints={blueprints} icpProfiles={icpProfiles} experiments={experiments} onAddExperiment={addExperiment} />} />
-            <Route path="/experiments/:id" element={<ExperimentDetail experiments={experiments} onUpdateExperiment={updateExperiment} onDeleteExperiment={deleteExperiment} />} />
+                            <Route path="/experiments/:id" element={<ExperimentDetail experiments={experiments} icpProfiles={icpProfiles} onUpdateExperiment={updateExperiment} onDeleteExperiment={deleteExperiment} />} />
             <Route path="/experiments/:id/edit" element={<CreateExperiment blueprints={blueprints} icpProfiles={icpProfiles} experiments={experiments} onAddExperiment={addExperiment} onUpdateExperiment={updateExperiment} isEditing={true} />} />
             <Route path="/ideas" element={<IdeasHub onAddExperiment={addExperiment} />} />
             <Route path="/ideas/create" element={<CreateIdea onAddIdea={addIdea} />} />

@@ -65,6 +65,18 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment, viewMode, o
   // Check if experiment is overdue
   const isOverdue = experiment.status === 'active' && calculateDaysRemaining(experiment.endDate) < 0;
 
+  // Function to get targeting display
+  const getTargetingDisplay = () => {
+    if (experiment.icpProfileId) {
+      return `ICP Profile (${experiment.icpProfileId.slice(0, 8)}...)`;
+    } else if (experiment.customTargeting) {
+      const jobTitles = experiment.customTargeting.jobTitles.slice(0, 2).join(', ');
+      const industries = experiment.customTargeting.industries.slice(0, 1).join(', ');
+      return `${jobTitles} in ${industries}`;
+    }
+    return experiment.targetAudience;
+  };
+
   if (viewMode === 'list') {
     return (
       <div 
@@ -117,7 +129,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment, viewMode, o
           
           <div className="flex items-center space-x-6">
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">{experiment.targetAudience}</div>
+              <div className="text-sm font-medium text-gray-900">{getTargetingDisplay()}</div>
               <div className="text-xs text-gray-500">Target Audience</div>
             </div>
             <div className="text-right">
@@ -196,7 +208,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment, viewMode, o
       <div className="space-y-3 mb-4">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Target Audience:</span>
-          <span className="font-medium text-gray-900">{experiment.targetAudience}</span>
+          <span className="font-medium text-gray-900">{getTargetingDisplay()}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Channel:</span>

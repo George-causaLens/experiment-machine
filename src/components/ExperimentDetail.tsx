@@ -10,21 +10,25 @@ import {
   PauseIcon,
   ExclamationTriangleIcon,
   FlagIcon,
-  EyeIcon
+  EyeIcon,
+  UserGroupIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
-import { Experiment } from '../types';
+import { Experiment, ICPProfile } from '../types';
 import { calculateSuccessScore, getSuccessStatus, calculateROI } from '../utils/successCalculator';
 import CountdownTimer from './CountdownTimer';
 import { formatDate, calculateDaysRemaining } from '../utils/dateUtils';
 
 interface ExperimentDetailProps {
   experiments: Experiment[];
+  icpProfiles: ICPProfile[];
   onUpdateExperiment: (id: string, updates: Partial<Experiment>) => void;
   onDeleteExperiment: (id: string) => void;
 }
 
 const ExperimentDetail: React.FC<ExperimentDetailProps> = ({ 
   experiments, 
+  icpProfiles,
   onUpdateExperiment, 
   onDeleteExperiment 
 }) => {
@@ -89,6 +93,53 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
   
   // Check if experiment is overdue
   const isOverdue = experiment.status === 'active' && calculateDaysRemaining(experiment.endDate) < 0;
+
+  // Function to get targeting information display
+  const getTargetingDisplay = () => {
+    if (experiment.icpProfileId) {
+      const icpProfile = icpProfiles.find(profile => profile.id === experiment.icpProfileId);
+      if (icpProfile) {
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <UserGroupIcon className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-blue-600">ICP Profile: {icpProfile.name}</span>
+            </div>
+            <div className="text-sm text-gray-600 ml-6">
+              <div>Job Titles: {icpProfile.jobTitles.join(', ')}</div>
+              <div>Industries: {icpProfile.industries.join(', ')}</div>
+              <div>Company Sizes: {icpProfile.companySizes.join(', ')}</div>
+              {icpProfile.painPoints.length > 0 && (
+                <div>Pain Points: {icpProfile.painPoints.join(', ')}</div>
+              )}
+            </div>
+          </div>
+        );
+      }
+    } else if (experiment.customTargeting) {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <BuildingOfficeIcon className="w-4 h-4 text-green-600" />
+            <span className="font-medium text-green-600">Custom Targeting</span>
+          </div>
+          <div className="text-sm text-gray-600 ml-6">
+            <div>Job Titles: {experiment.customTargeting.jobTitles.join(', ')}</div>
+            <div>Industries: {experiment.customTargeting.industries.join(', ')}</div>
+            <div>Company Sizes: {experiment.customTargeting.companySizes.join(', ')}</div>
+            {experiment.customTargeting.painPoints && experiment.customTargeting.painPoints.length > 0 && (
+              <div>Pain Points: {experiment.customTargeting.painPoints.join(', ')}</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // Fallback to legacy targetAudience
+    return (
+      <div className="font-medium text-gray-900">{experiment.targetAudience}</div>
+    );
+  };
 
   const handleStatusChange = (newStatus: Experiment['status']) => {
     onUpdateExperiment(experiment.id, { status: newStatus });
@@ -509,7 +560,7 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               </div>
               <div>
                 <span className="text-sm text-gray-600">Target Audience:</span>
-                <div className="font-medium text-gray-900">{experiment.targetAudience}</div>
+                {getTargetingDisplay()}
               </div>
             </div>
           </div>
