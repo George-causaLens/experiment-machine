@@ -13,7 +13,7 @@ import {
 import { Blueprint } from '../types';
 
 interface CreateBlueprintProps {
-  onAddBlueprint: (blueprint: Blueprint) => void;
+  onAddBlueprint: (blueprint: Omit<Blueprint, 'id' | 'createdAt' | 'lastUsed'>) => void;
 }
 
 const CreateBlueprint: React.FC<CreateBlueprintProps> = ({ onAddBlueprint }) => {
