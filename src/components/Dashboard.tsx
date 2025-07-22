@@ -34,7 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ experiments, blueprints }) => {
     if (experiments.length === 0) return 'N/A';
     
     const channelStats = experiments.reduce((acc, exp) => {
-      const channel = exp.distributionChannel;
+      const channel = exp.distributionChannels[0] || '';
       if (!acc[channel]) {
         acc[channel] = { count: 0, totalScore: 0 };
       }

@@ -50,7 +50,7 @@ export class PerformanceAnalyzer {
     
     // Group experiments by distribution channel
     experiments.forEach(exp => {
-      const channel = exp.distributionChannel;
+      const channel = exp.distributionChannels[0] || '';
       if (!channelMap.has(channel)) {
         channelMap.set(channel, []);
       }
@@ -122,7 +122,7 @@ export class PerformanceAnalyzer {
     
     // Group experiments by outreach strategy
     experiments.forEach(exp => {
-      const strategy = exp.outreachStrategy;
+      const strategy = exp.outreachStrategies[0] || '';
       if (!strategyMap.has(strategy)) {
         strategyMap.set(strategy, []);
       }

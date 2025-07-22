@@ -115,7 +115,7 @@ export const useAnalytics = (
       }
 
       // Channel filter
-      if (filters.channels.length > 0 && !filters.channels.includes(exp.distributionChannel)) {
+      if (filters.channels.length > 0 && !exp.distributionChannels.some(channel => filters.channels.includes(channel))) {
         return false;
       }
 
@@ -157,7 +157,7 @@ export const useAnalytics = (
     // Channel Analysis
     const channelMap = new Map<string, Experiment[]>();
     filteredExperiments.forEach(exp => {
-      const channel = exp.distributionChannel;
+      const channel = exp.distributionChannels[0] || '';
       if (!channelMap.has(channel)) {
         channelMap.set(channel, []);
       }

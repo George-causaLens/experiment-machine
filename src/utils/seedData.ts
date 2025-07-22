@@ -70,10 +70,10 @@ export const seedSampleData = async () => {
       startedAt: new Date('2024-01-16'),
       endDate: new Date('2024-12-15'),
       blueprintId: blueprint1?.id || 'bp-001',
-      outreachStrategy: 'LinkedIn Direct Message',
+      outreachStrategies: ['LinkedIn Direct Message'],
       messaging: 'Technical pain point messaging focused on document processing inefficiencies',
       content: 'LinkedIn Direct Message',
-      distributionChannel: 'LinkedIn',
+      distributionChannels: ['LinkedIn'],
       targetAudience: 'Manufacturing COOs at $100M+ companies',
       variables: [
         { name: 'Target Role', value: 'COO', type: 'icp' },

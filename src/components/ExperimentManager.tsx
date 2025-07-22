@@ -56,7 +56,7 @@ const ExperimentManager: React.FC<ExperimentManagerProps> = ({
     }
 
     // Channel filter
-    if (filters.channel && filters.channel.length > 0 && !filters.channel.includes(experiment.distributionChannel)) {
+            if (filters.channel && filters.channel.length > 0 && !experiment.distributionChannels.some(channel => filters.channel!.includes(channel))) {
       return false;
     }
 

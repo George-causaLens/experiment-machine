@@ -57,10 +57,10 @@ export class RecommendationEngine {
         recommendations.push({
           id: `blueprint-scale-${Date.now()}-${index}`,
           type: 'blueprint-match',
-          title: `Scale ${topExp.outreachStrategy} Success`,
-          description: `Your ${topExp.outreachStrategy} strategy shows ${Math.round(topExp.successScore || 0)}% success rate. Consider scaling this approach to new channels or content variations.`,
+          title: `Scale ${topExp.outreachStrategies[0] || 'Strategy'} Success`,
+          description: `Your ${topExp.outreachStrategies[0] || 'strategy'} shows ${Math.round(topExp.successScore || 0)}% success rate. Consider scaling this approach to new channels or content variations.`,
           confidence,
-          reasoning: `Historical data shows ${topExp.outreachStrategy} performs well with ${topExp.targetAudience}. Scaling to new channels could increase reach.`,
+          reasoning: `Historical data shows ${topExp.outreachStrategies[0] || 'strategy'} performs well with ${topExp.targetAudience}. Scaling to new channels could increase reach.`,
           suggestedVariables: this.extractVariablesFromExperiment(topExp),
           expectedOutcome: `Expected ${Math.round(topExp.successScore || 0) * 0.8}-${Math.round(topExp.successScore || 0) * 1.2}% success rate with similar ROI patterns`,
           relatedBlueprints: [topExp.blueprintId],
@@ -78,10 +78,10 @@ export class RecommendationEngine {
         recommendations.push({
           id: `blueprint-match-${Date.now()}-${index}`,
           type: 'blueprint-match',
-          title: `Apply ${topExp.outreachStrategy} to ${targetICP}`,
-          description: `Your ${topExp.outreachStrategy} strategy shows ${Math.round(topExp.successScore || 0)}% success rate. Apply similar approach to ${targetICP} for potential high performance.`,
+          title: `Apply ${topExp.outreachStrategies[0] || 'Strategy'} to ${targetICP}`,
+          description: `Your ${topExp.outreachStrategies[0] || 'strategy'} shows ${Math.round(topExp.successScore || 0)}% success rate. Apply similar approach to ${targetICP} for potential high performance.`,
           confidence,
-          reasoning: `Historical data shows ${topExp.outreachStrategy} performs well with ${topExp.targetAudience}. Similar approach should work for ${targetICP}.`,
+          reasoning: `Historical data shows ${topExp.outreachStrategies[0] || 'strategy'} performs well with ${topExp.targetAudience}. Similar approach should work for ${targetICP}.`,
           suggestedVariables: this.extractVariablesFromExperiment(topExp),
           expectedOutcome: `Expected ${Math.round(topExp.successScore || 0) * 0.8}-${Math.round(topExp.successScore || 0) * 1.2}% success rate with similar ROI patterns`,
           relatedBlueprints: [topExp.blueprintId],
@@ -184,7 +184,7 @@ export class RecommendationEngine {
             title: `Optimize ${underExp.name}`,
             description: `Your experiment "${underExp.name}" is underperforming (${Math.round(underExp.successScore || 0)}% success). Apply successful patterns from similar experiments.`,
             confidence,
-            reasoning: `Similar experiments using ${similarSuccessfulExp.outreachStrategy} show ${Math.round(similarSuccessfulExp.successScore || 0)}% success rate. Consider adopting similar approach.`,
+            reasoning: `Similar experiments using ${similarSuccessfulExp.outreachStrategies[0] || 'strategy'} show ${Math.round(similarSuccessfulExp.successScore || 0)}% success rate. Consider adopting similar approach.`,
             suggestedVariables: this.generateOptimizationVariables(underExp, similarSuccessfulExp),
             expectedOutcome: `Expected improvement from ${Math.round(underExp.successScore || 0)}% to ${Math.round(similarSuccessfulExp.successScore || 0) * 0.8}% success rate`,
             relatedBlueprints: [underExp.blueprintId, similarSuccessfulExp.blueprintId],
@@ -298,8 +298,8 @@ export class RecommendationEngine {
    */
   private extractVariablesFromExperiment(experiment: Experiment): ExperimentVariable[] {
     const variables: ExperimentVariable[] = [
-      { name: 'Outreach Strategy', value: experiment.outreachStrategy, type: 'other' },
-      { name: 'Distribution Channel', value: experiment.distributionChannel, type: 'channel' }
+              { name: 'Outreach Strategy', value: experiment.outreachStrategies[0] || '', type: 'other' },
+              { name: 'Distribution Channel', value: experiment.distributionChannels[0] || '', type: 'channel' }
     ];
 
     if (experiment.messaging) {
@@ -323,19 +323,19 @@ export class RecommendationEngine {
     const variables: ExperimentVariable[] = [];
 
     // Suggest adopting successful strategy if different
-    if (underperformingExp.outreachStrategy !== successfulExp.outreachStrategy) {
-      variables.push({ 
-        name: 'Outreach Strategy', 
-        value: successfulExp.outreachStrategy, 
+          if (underperformingExp.outreachStrategies[0] !== successfulExp.outreachStrategies[0]) {
+        variables.push({
+          name: 'Outreach Strategy',
+          value: successfulExp.outreachStrategies[0] || '', 
         type: 'other' 
       });
     }
 
     // Suggest adopting successful channel if different
-    if (underperformingExp.distributionChannel !== successfulExp.distributionChannel) {
-      variables.push({ 
-        name: 'Distribution Channel', 
-        value: successfulExp.distributionChannel, 
+          if (underperformingExp.distributionChannels[0] !== successfulExp.distributionChannels[0]) {
+        variables.push({
+          name: 'Distribution Channel',
+          value: successfulExp.distributionChannels[0] || '', 
         type: 'channel' 
       });
     }
@@ -362,7 +362,7 @@ export class RecommendationEngine {
     // Find experiment with same ICP but different strategy
     return successfulExperiments.find(exp => 
       this.areSimilarICPs(exp.targetAudience, underperformingExp.targetAudience) &&
-      exp.outreachStrategy !== underperformingExp.outreachStrategy
+              exp.outreachStrategies[0] !== underperformingExp.outreachStrategies[0]
     ) || null;
   }
 

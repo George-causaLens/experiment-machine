@@ -274,7 +274,7 @@ const BlueprintDetail: React.FC<BlueprintDetailProps> = ({
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-medium text-gray-900">{experiment.name}</h3>
-                        <p className="text-sm text-gray-600">{experiment.outreachStrategy}</p>
+                        <p className="text-sm text-gray-600">{experiment.outreachStrategies.join(', ')}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-medium text-gray-900">{experiment.successScore}%</div>

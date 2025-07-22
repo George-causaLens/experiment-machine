@@ -552,11 +552,11 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               )}
               <div>
                 <span className="text-sm text-gray-600">Strategy:</span>
-                <div className="font-medium text-gray-900">{experiment.outreachStrategy}</div>
+                <div className="font-medium text-gray-900">{experiment.outreachStrategies.join(', ')}</div>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Channel:</span>
-                <div className="font-medium text-gray-900">{experiment.distributionChannel}</div>
+                <div className="font-medium text-gray-900">{experiment.distributionChannels.join(', ')}</div>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Target Audience:</span>
@@ -703,7 +703,7 @@ const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {(() => {
-                      const channel = experiment.distributionChannel.toLowerCase();
+                      const channel = experiment.distributionChannels[0]?.toLowerCase() || '';
                       const channelMetrics: string[] = [];
                       
                       // Define channel-specific metrics

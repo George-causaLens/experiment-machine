@@ -26,7 +26,7 @@ const AnalyticsFilters: React.FC<AnalyticsFiltersProps> = ({
 
   // Extract unique values from experiments
   const uniqueStatuses = Array.from(new Set(experiments.map(exp => exp.status)));
-  const uniqueChannels = Array.from(new Set(experiments.map(exp => exp.distributionChannel)));
+  const uniqueChannels = Array.from(new Set(experiments.flatMap(exp => exp.distributionChannels)));
   const uniqueTags = Array.from(new Set(experiments.flatMap(exp => exp.tags)));
 
   const toggleFilter = (filterName: string) => {

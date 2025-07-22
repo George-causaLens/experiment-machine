@@ -133,7 +133,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment, viewMode, o
               <div className="text-xs text-gray-500">Target Audience</div>
             </div>
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">{experiment.distributionChannel}</div>
+                              <div className="text-sm font-medium text-gray-900">{experiment.distributionChannels.join(', ')}</div>
               <div className="text-xs text-gray-500">Channel</div>
             </div>
             <div className="text-right">
@@ -212,7 +212,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment, viewMode, o
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Channel:</span>
-          <span className="font-medium text-gray-900">{experiment.distributionChannel}</span>
+                          <span className="font-medium text-gray-900">{experiment.distributionChannels.join(', ')}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Created:</span>

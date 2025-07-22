@@ -52,8 +52,8 @@ const AnalyticsTable: React.FC<AnalyticsTableProps> = ({ experiments }) => {
         bValue = b.createdAt.getTime();
         break;
       case 'channel':
-        aValue = a.distributionChannel.toLowerCase();
-        bValue = b.distributionChannel.toLowerCase();
+        aValue = a.distributionChannels[0]?.toLowerCase() || '';
+        bValue = b.distributionChannels[0]?.toLowerCase() || '';
         break;
       case 'blueprintId':
         aValue = a.blueprintId;
@@ -148,7 +148,7 @@ const AnalyticsTable: React.FC<AnalyticsTableProps> = ({ experiments }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {experiment.distributionChannel}
+                  {experiment.distributionChannels.join(', ')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {experiment.blueprintId}
