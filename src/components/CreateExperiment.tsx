@@ -39,10 +39,10 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
     name: '',
     description: '',
     blueprintId: '',
-    outreachStrategy: '',
+    outreachStrategies: [],
     messaging: '',
     content: '',
-    distributionChannel: '',
+    distributionChannels: [],
     targetAudience: '',
     selectedIcpProfileId: '',
     customTargeting: null as CustomTargeting | null,
@@ -330,10 +330,10 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
           name: existingExperiment.name,
           description: existingExperiment.description,
           blueprintId: existingExperiment.blueprintId,
-          outreachStrategy: existingExperiment.outreachStrategy,
-          messaging: existingExperiment.messaging,
-          content: existingExperiment.content,
-          distributionChannel: existingExperiment.distributionChannel,
+                outreachStrategies: existingExperiment.outreachStrategies || (existingExperiment.outreachStrategy ? [existingExperiment.outreachStrategy] : []),
+      messaging: existingExperiment.messaging,
+      content: existingExperiment.content,
+      distributionChannels: existingExperiment.distributionChannels || (existingExperiment.distributionChannel ? [existingExperiment.distributionChannel] : []),
           targetAudience: existingExperiment.targetAudience,
           selectedIcpProfileId: existingExperiment.icpProfileId || '',
           customTargeting: existingExperiment.customTargeting || null,
@@ -377,10 +377,10 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
         ...prev,
         name: aiRecommendation.title,
         description: aiRecommendation.description,
-        outreachStrategy: outreachStrategy,
+        outreachStrategies: outreachStrategy ? [outreachStrategy] : [],
         messaging: messaging || roiFocus || valueFocus,
         content: content || contentStrategy,
-        distributionChannel: getDistributionChannel(outreachStrategy),
+        distributionChannels: outreachStrategy ? [getDistributionChannel(outreachStrategy)] : [],
         variables: suggestedVariables,
         tags: ['ai-recommendation', aiRecommendation.type]
       }));
@@ -394,8 +394,8 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
         ...prev,
         name: selectedIdea.name || '',
         description: selectedIdea.description || '',
-        outreachStrategy: selectedIdea.outreachStrategies?.[0] || '',
-        distributionChannel: selectedIdea.distributionChannels?.[0] || '',
+        outreachStrategies: selectedIdea.outreachStrategies || [],
+        distributionChannels: selectedIdea.distributionChannels || [],
         content: selectedIdea.contentTypes?.[0] || '',
         messaging: selectedIdea.messagingFocus?.[0] || '',
         tags: selectedIdea.tags || [],
@@ -444,6 +444,16 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
       // Show error message in UI instead of alert
       return;
     }
+
+    // Validate that at least one outreach strategy and distribution channel are selected
+    if (!targetingData.outreachStrategies.length) {
+      alert('Please select at least one outreach strategy');
+      return;
+    }
+    if (!targetingData.distributionChannels.length) {
+      alert('Please select at least one distribution channel');
+      return;
+    }
     
     // Determine target audience based on ICP profile or custom targeting
     let finalTargetAudience = formData.targetAudience;
@@ -467,10 +477,10 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
       description: targetingData.description,
       endDate: new Date(targetingData.endDate),
       blueprintId: targetingData.blueprintId,
-      outreachStrategy: targetingData.outreachStrategy,
+      outreachStrategies: targetingData.outreachStrategies,
       messaging: targetingData.messaging,
       content: targetingData.content,
-      distributionChannel: targetingData.distributionChannel,
+      distributionChannels: targetingData.distributionChannels,
       targetAudience: finalTargetAudience,
       variables: targetingData.variables,
       successCriteria: targetingData.successCriteria,
@@ -615,6 +625,39 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
       urls: (prev.urls || []).map((url, i) => 
         i === index ? { ...url, [field]: value } : url
       )
+    }));
+  };
+
+  // Helper functions for managing outreach strategies and distribution channels
+  const addOutreachStrategy = (strategy: string) => {
+    if (strategy && !formData.outreachStrategies.includes(strategy)) {
+      setFormData(prev => ({
+        ...prev,
+        outreachStrategies: [...prev.outreachStrategies, strategy]
+      }));
+    }
+  };
+
+  const removeOutreachStrategy = (strategy: string) => {
+    setFormData(prev => ({
+      ...prev,
+      outreachStrategies: prev.outreachStrategies.filter(s => s !== strategy)
+    }));
+  };
+
+  const addDistributionChannel = (channel: string) => {
+    if (channel && !formData.distributionChannels.includes(channel)) {
+      setFormData(prev => ({
+        ...prev,
+        distributionChannels: [...prev.distributionChannels, channel]
+      }));
+    }
+  };
+
+  const removeDistributionChannel = (channel: string) => {
+    setFormData(prev => ({
+      ...prev,
+      distributionChannels: prev.distributionChannels.filter(c => c !== channel)
     }));
   };
 
@@ -806,35 +849,87 @@ const CreateExperiment: React.FC<CreateExperimentProps> = ({ blueprints, icpProf
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Outreach Strategy *
+                Outreach Strategies *
               </label>
-              <select
-                required
-                value={formData.outreachStrategy}
-                onChange={(e) => setFormData(prev => ({ ...prev, outreachStrategy: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Select strategy</option>
-                {outreachStrategies.map(strategy => (
-                  <option key={strategy} value={strategy}>{strategy}</option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                {/* Selected strategies */}
+                {formData.outreachStrategies.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.outreachStrategies.map(strategy => (
+                      <span key={strategy} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                        {strategy}
+                        <button
+                          type="button"
+                          onClick={() => removeOutreachStrategy(strategy)}
+                          className="ml-1 hover:bg-primary-200 rounded-full p-0.5"
+                        >
+                          <XMarkIcon className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Add new strategy */}
+                <div className="flex space-x-2">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        addOutreachStrategy(e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">Add strategy</option>
+                    {outreachStrategies.filter(strategy => !formData.outreachStrategies.includes(strategy)).map(strategy => (
+                      <option key={strategy} value={strategy}>{strategy}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Distribution Channel *
+                Distribution Channels *
               </label>
-              <select
-                required
-                value={formData.distributionChannel}
-                onChange={(e) => setFormData(prev => ({ ...prev, distributionChannel: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Select channel</option>
-                {distributionChannels.map(channel => (
-                  <option key={channel} value={channel}>{channel}</option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                {/* Selected channels */}
+                {formData.distributionChannels.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.distributionChannels.map(channel => (
+                      <span key={channel} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800">
+                        {channel}
+                        <button
+                          type="button"
+                          onClick={() => removeDistributionChannel(channel)}
+                          className="ml-1 hover:bg-success-200 rounded-full p-0.5"
+                        >
+                          <XMarkIcon className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Add new channel */}
+                <div className="flex space-x-2">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        addDistributionChannel(e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">Add channel</option>
+                    {distributionChannels.filter(channel => !formData.distributionChannels.includes(channel)).map(channel => (
+                      <option key={channel} value={channel}>{channel}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">

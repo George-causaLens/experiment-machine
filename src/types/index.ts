@@ -40,10 +40,10 @@ export interface Experiment {
   endDate: Date; // NEW: When the experiment is scheduled to end
   completedAt?: Date;
   blueprintId: string; // Links experiment to specific blueprint
-  outreachStrategy: string; // e.g., "LinkedIn Direct Message", "Email Sequence", "Content Marketing"
+  outreachStrategies: string[]; // e.g., ["LinkedIn Direct Message", "Email Sequence", "Content Marketing"]
   messaging: string;
   content: string;
-  distributionChannel: string;
+  distributionChannels: string[];
   variables: ExperimentVariable[];
   metrics: ExperimentMetrics;
   successScore?: number;

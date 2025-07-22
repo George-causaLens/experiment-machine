@@ -12,10 +12,10 @@ const transformExperiment = (dbExperiment: any): Experiment => ({
   endDate: new Date(dbExperiment.end_date),
   completedAt: dbExperiment.completed_at ? new Date(dbExperiment.completed_at) : undefined,
   blueprintId: dbExperiment.blueprint_id,
-  outreachStrategy: dbExperiment.outreach_strategy,
+  outreachStrategies: dbExperiment.outreach_strategies || (dbExperiment.outreach_strategy ? [dbExperiment.outreach_strategy] : []),
   messaging: dbExperiment.messaging,
   content: dbExperiment.content,
-  distributionChannel: dbExperiment.distribution_channel,
+  distributionChannels: dbExperiment.distribution_channels || (dbExperiment.distribution_channel ? [dbExperiment.distribution_channel] : []),
   variables: dbExperiment.variables || [],
   metrics: dbExperiment.metrics || {
     impressions: 0,
@@ -177,10 +177,12 @@ export class DataService {
       end_date: experiment.endDate.toISOString(),
       completed_at: experiment.completedAt,
       blueprint_id: experiment.blueprintId,
-      outreach_strategy: experiment.outreachStrategy,
+      outreach_strategies: experiment.outreachStrategies,
+      outreach_strategy: experiment.outreachStrategies?.[0] || null, // Keep for backward compatibility
       messaging: experiment.messaging,
       content: experiment.content,
-      distribution_channel: experiment.distributionChannel,
+      distribution_channels: experiment.distributionChannels,
+      distribution_channel: experiment.distributionChannels?.[0] || null, // Keep for backward compatibility
       variables: experiment.variables,
       metrics: experiment.metrics,
       success_score: experiment.successScore,
@@ -229,10 +231,16 @@ export class DataService {
     if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate.toISOString();
     if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt?.toISOString();
     if (updates.blueprintId !== undefined) dbUpdates.blueprint_id = updates.blueprintId;
-    if (updates.outreachStrategy !== undefined) dbUpdates.outreach_strategy = updates.outreachStrategy;
+    if (updates.outreachStrategies !== undefined) {
+      dbUpdates.outreach_strategies = updates.outreachStrategies;
+      dbUpdates.outreach_strategy = updates.outreachStrategies?.[0] || null; // Keep for backward compatibility
+    }
     if (updates.messaging !== undefined) dbUpdates.messaging = updates.messaging;
     if (updates.content !== undefined) dbUpdates.content = updates.content;
-    if (updates.distributionChannel !== undefined) dbUpdates.distribution_channel = updates.distributionChannel;
+    if (updates.distributionChannels !== undefined) {
+      dbUpdates.distribution_channels = updates.distributionChannels;
+      dbUpdates.distribution_channel = updates.distributionChannels?.[0] || null; // Keep for backward compatibility
+    }
     if (updates.variables !== undefined) dbUpdates.variables = updates.variables;
     if (updates.metrics !== undefined) dbUpdates.metrics = updates.metrics;
     if (updates.successScore !== undefined) dbUpdates.success_score = updates.successScore;
