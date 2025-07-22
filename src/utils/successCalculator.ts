@@ -77,7 +77,7 @@ const calculateSecondaryGoalsScore = (experiment: Experiment): number => {
   const { metrics } = experiment;
   const { secondaryGoals, targetMetrics } = successCriteria;
   
-  if (!secondaryGoals || secondaryGoals.length === 0) return 100; // No secondary goals = perfect score
+  if (!secondaryGoals || secondaryGoals.length === 0) return 0; // No secondary goals = 0 score
   
   let totalScore = 0;
   let goalCount = 0;
